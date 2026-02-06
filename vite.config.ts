@@ -12,15 +12,17 @@ export default defineConfig({
     },
   },
   server:{
-    host: '127.0.0.1',
+    host: true,
     port:8082,
     strictPort:true,
-    open:true,
+    open: "http://sso.local:8082",
+    allowedHosts: ["sso.local"],
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8080',
+        target: 'http://bff.local:8080',
         changeOrigin: true,
         secure: false,
+        cookieDomainRewrite: '.local',
         configure: (proxy, options) => {
           proxy.on('error', (err, req, res) => {
             console.log('proxy error', err);

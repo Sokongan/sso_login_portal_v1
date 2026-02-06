@@ -111,6 +111,8 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-width: 20rem;
+  --sidebar-width-mobile: 20rem;
 }
 
 @layer base {
@@ -121,4 +123,3 @@
     @apply bg-background text-foreground;
   }
 }
-
