@@ -15,14 +15,14 @@ export default defineConfig({
     host: true,
     port:8082,
     strictPort:true,
-    open: "http://sso.local:8082",
-    allowedHosts: ["sso.local"],
+    open: "https://sso-staging.doj.gov.ph",
+    allowedHosts: ["https://sso-staging.doj.gov.ph"],
     proxy: {
       '/api': {
-        target: 'http://bff.local:8080',
+        target: 'https://sso-bff-staging.gov.ph',
         changeOrigin: true,
         secure: false,
-        cookieDomainRewrite: '.local',
+        cookieDomainRewrite: '.doj.gov.ph',
         configure: (proxy, options) => {
           proxy.on('error', (err, req, res) => {
             console.log('proxy error', err);

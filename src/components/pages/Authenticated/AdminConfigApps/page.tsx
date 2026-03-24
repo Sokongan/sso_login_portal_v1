@@ -145,6 +145,25 @@ export default function AdminConfigAppsPage() {
             <div className="rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
               <div>
                 <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                  App access
+                </h2>
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                  Overview of registered applications.
+                </p>
+              </div>
+              <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/40">
+                <div className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                  Total apps
+                </div>
+                <div className="mt-2 text-3xl font-semibold text-slate-900 dark:text-slate-100">
+                  {apps.length}
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
+              <div>
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                   App registration
                 </h2>
                 <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">

@@ -9,11 +9,12 @@ import AccountSettingsPage from './components/pages/Authenticated/Settings/page'
 import Callback from './components/pages/Callback/page';
 // import Consent from './components/pages/Consent/page';
 import { SessionProvider, useSession } from './context/SessionContext';
-import Landing from './components/pages/Default/page';
 import ErrorPage from './components/pages/Error/page';
 import { ThemeProvider } from './components/theme-provider';
-import { JSX } from 'react';
+import { useEffect } from 'react';
+import type { JSX } from 'react';
 import { AuthGate } from './components/auth/AuthGate';
+import { useDefaultApp } from './hooks/auth/useDefaultApp';
 
 
 function LoadingScreen() {
@@ -24,15 +25,41 @@ function LoadingScreen() {
   );
 }
 
+function AuthenticatedRedirect({ to }: { to: string }) {
+  useEffect(() => {
+    window.location.assign(to);
+  }, [to]);
+
+  return <LoadingScreen />;
+}
+
 function RedirectIfAuthed({ children }: { children: JSX.Element }) {
   const { isAuthenticated, isLoading } = useSession();
+  const { redirectPath, isLoading: isAppLoading } = useDefaultApp();
+
+  const nextTarget = redirectPath || '/dashboard';
 
   if (isLoading) {
     return <LoadingScreen />;
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    if (isAppLoading) {
+      return <LoadingScreen />;
+    }
+
+    let redirectUrl: URL;
+    try {
+      redirectUrl = new URL(nextTarget, window.location.origin);
+    } catch {
+      return <Navigate to="/dashboard" replace />;
+    }
+
+    if (redirectUrl.origin === window.location.origin) {
+      const nextPath = `${redirectUrl.pathname}${redirectUrl.search}${redirectUrl.hash}`;
+      return <Navigate to={nextPath} replace />;
+    }
+    return <AuthenticatedRedirect to={redirectUrl.toString()} />;
   }
 
   return children;
@@ -46,6 +73,14 @@ function App() {
           <div className="App">
             <Routes>
               <Route
+                path="/"
+                element={
+                  <RedirectIfAuthed>
+                    <Login />
+                  </RedirectIfAuthed>
+                }
+              />
+              <Route
                 path="/login"
                 element={
                   <RedirectIfAuthed>
@@ -55,7 +90,6 @@ function App() {
               />
               <Route path="/callback" element={<Callback />} />
               {/* <Route path="/consent" element={<Consent />} /> */}
-              <Route path="/" element={<Landing />} />
               <Route
                 path="/dashboard"
                 element={
@@ -120,7 +154,7 @@ function App() {
                 element={
                   <AuthGate
                     title="Session required"
-                    subtitle="Sign in with your SSO account to manage allowed applications."
+                    subtitle="Sign in with your SSO account to manage app access."
                   >
                     <AdminConfigAppsPage />
                   </AuthGate>

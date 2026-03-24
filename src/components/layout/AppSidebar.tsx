@@ -31,28 +31,21 @@ const navSecondary = [
     title: "Administration",
     url: "/admin",
     icon: Shield,
+  },
+  {
+    title: "Config",
+    url: "/admin/config",
+    icon: Settings,
     items: [
       {
-        title: "Admin console",
-        url: "/admin",
-        icon: Shield,
+        title: "Roles & permissions",
+        url: "/admin/config/roles",
+        icon: Settings,
       },
       {
-        title: "Config",
-        url: "/admin/config",
+        title: "App access",
+        url: "/admin/config/apps",
         icon: Settings,
-        items: [
-          {
-            title: "Roles & permissions",
-            url: "/admin/config/roles",
-            icon: Settings,
-          },
-          {
-            title: "App registration",
-            url: "/admin/config/apps",
-            icon: Settings,
-          },
-        ],
       },
     ],
   },

@@ -6,16 +6,23 @@ type UseLoginFormState = {
   redirect: string;
   errorMessage: string;
   submitError: string;
+  isSubmitting: boolean;
   hasChallenge: boolean;
   handleSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
 };
 
-export function useLoginForm(): UseLoginFormState {
+type UseLoginFormOptions = {
+  defaultRedirect?: string;
+};
+
+export function useLoginForm(options: UseLoginFormOptions = {}): UseLoginFormState {
   const [searchParams] = useSearchParams();
   const loginChallenge = searchParams.get('login_challenge') ?? '';
-  const redirect = searchParams.get('redirect') ?? '/dashboard';
+  const redirect =
+    searchParams.get('redirect') ?? options.defaultRedirect ?? '/dashboard';
   const error = searchParams.get('error') ?? '';
   const [submitError, setSubmitError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const hasChallenge = useMemo(() => loginChallenge.length > 0, [loginChallenge]);
   const errorMessage = useMemo(() => {
@@ -29,6 +36,7 @@ export function useLoginForm(): UseLoginFormState {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitError('');
+    setIsSubmitting(true);
 
     const form = event.currentTarget;
     const identifier = (form.elements.namedItem('identifier') as HTMLInputElement | null)
@@ -66,8 +74,10 @@ export function useLoginForm(): UseLoginFormState {
       if (!response.ok) {
         setSubmitError('Unable to sign in. Please try again.');
       }
-    } catch (submitError) {
+    } catch {
       setSubmitError('Unable to sign in. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -76,6 +86,7 @@ export function useLoginForm(): UseLoginFormState {
     redirect,
     errorMessage,
     submitError,
+    isSubmitting,
     hasChallenge,
     handleSubmit,
   };

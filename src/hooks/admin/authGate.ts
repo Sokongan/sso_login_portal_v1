@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useCallback } from "react";
-import { useLocation } from "react-router-dom";
 import { useSession } from "@/context/SessionContext";
 import { useDefaultApp } from "@/hooks/auth/useDefaultApp";
 
@@ -12,9 +11,9 @@ export function useAuthGate({
   autoRedirect = false,
   redirectPath,
 }: UseAuthGate) {
-  const location = useLocation();
   const { isAuthenticated, isLoading, checkSession } = useSession();
-  const { appDSN, isLoading: isAppLoading } = useDefaultApp();
+  const { appDSN, redirectPath: appRedirectPath, isLoading: isAppLoading } =
+    useDefaultApp();
 
   useEffect(() => {
     void checkSession();
@@ -22,9 +21,9 @@ export function useAuthGate({
 
   const redirectTarget = useMemo(() => {
     if (redirectPath) return redirectPath;
-  
-    return  "/dashboard" ;
-  }, [location.pathname]);
+    if (appRedirectPath) return appRedirectPath;
+    return "/dashboard";
+  }, [appRedirectPath, redirectPath]);
 
   const handleLogin = useCallback(() => {
     const dsn = appDSN ?? window.location.origin;

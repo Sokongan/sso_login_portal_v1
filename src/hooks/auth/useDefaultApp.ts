@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react';
-import { listApps } from '@/lib/api/apps';
+import { listApps, type AppRegistration } from '@/lib/api/apps';
 
 type UseDefaultAppResult = {
+  app: AppRegistration | null;
   appDSN: string | null;
+  redirectPath: string | null;
   isLoading: boolean;
   error: string | null;
 };
 
 export function useDefaultApp(): UseDefaultAppResult {
+  const [app, setApp] = useState<AppRegistration | null>(null);
   const [appDSN, setAppDSN] = useState<string | null>(null);
+  const [redirectPath, setRedirectPath] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,12 +30,16 @@ export function useDefaultApp(): UseDefaultAppResult {
           throw new Error('No apps configured.');
         }
         if (isMounted) {
+          setApp(firstApp);
           setAppDSN(firstApp.dsn);
+          setRedirectPath(firstApp.redirect_path || null);
           setError(null);
         }
       } catch (err) {
         if (isMounted) {
+          setApp(null);
           setAppDSN(null);
+          setRedirectPath(null);
           setError(err instanceof Error ? err.message : 'Unable to load apps.');
         }
       } finally {
@@ -46,5 +54,5 @@ export function useDefaultApp(): UseDefaultAppResult {
     };
   }, []);
 
-  return { appDSN, isLoading, error };
+  return { app, appDSN, redirectPath, isLoading, error };
 }
