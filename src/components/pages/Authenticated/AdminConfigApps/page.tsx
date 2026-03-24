@@ -213,52 +213,6 @@ export default function AdminConfigAppsPage() {
                 {status === 'loading' ? (
                   <p className="text-sm text-slate-500 dark:text-slate-400">Loading apps…</p>
                 ) : null}
-                {status === 'error' ? (
-                  <p className="text-sm text-rose-600 dark:text-rose-400">
-                    {message || 'Unable to load apps.'}
-                  </p>
-                ) : null}
-                {status !== 'loading' && !hasApps ? (
-                  <p className="text-sm text-slate-500 dark:text-slate-400">No apps yet.</p>
-                ) : null}
-                {hasApps ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>DSN</TableHead>
-                        <TableHead>Redirect path</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {apps.map((app) => (
-                        <TableRow key={app.id}>
-                          <TableCell>{app.dsn}</TableCell>
-                          <TableCell>{app.redirect_path}</TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button
-                                variant="outline"
-                                size="xs"
-                                onClick={() => setEditingApp({ ...app })}
-                              >
-                                Edit
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="xs"
-                                onClick={() => handleDelete(app)}
-                                disabled={saving}
-                              >
-                                Delete
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                ) : null}
               </div>
             </div>
           </section>

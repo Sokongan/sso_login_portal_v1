@@ -4,7 +4,7 @@ import { apiGet, apiPost } from './http';
 export type { SettingsFlow, UpdateSettingsFlowBody };
 
 export async function getSettingsFlow() {
-  return apiGet<SettingsFlow>('/api/kratos/settings/flow');
+  return apiGet<SettingsFlow>('/api/identity/settings/flow');
 }
 
 export async function submitSettingsFlow(
@@ -12,5 +12,5 @@ export async function submitSettingsFlow(
   payload: UpdateSettingsFlowBody
 ) {
   const query = flowId ? `?flow=${encodeURIComponent(flowId)}` : '';
-  return apiPost<SettingsFlow>(`/api/kratos/settings/submit${query}`, payload);
+  return apiPost<SettingsFlow>(`/api/identity/settings/submit${query}`, payload);
 }

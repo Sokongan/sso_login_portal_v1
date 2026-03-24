@@ -1,14 +1,16 @@
+import { type ReactNode, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { useDefaultApp } from '@/hooks/auth/useDefaultApp';
 import { useLoginForm } from '@/hooks/auth/useLoginForm';
 import {
   ArrowRight,
-  KeyRound,
+  Eye,
+  EyeOff,
   LoaderCircle,
   LockKeyhole,
-  ShieldCheck,
-  Workflow,
+  Shield,
 } from 'lucide-react';
 
 function getDisplayLabel(value: string | null | undefined) {
@@ -22,65 +24,70 @@ function getDisplayLabel(value: string | null | undefined) {
   }
 }
 
-function SecurityRail({
-  identitySource,
-  returnTarget,
+function toTitleCase(value: string) {
+  return value
+    .split(/[\s-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(' ');
+}
+
+function getPortalLabel(value: string | null | undefined, fallback: string) {
+  if (!value) return fallback;
+
+  try {
+    const url = new URL(value, window.location.origin);
+    const host = url.host || url.pathname || fallback;
+    const base = host
+      .replace(/^www\./i, '')
+      .split('.')[0]
+      ?.replace(/[^a-zA-Z0-9]+/g, ' ')
+      .trim();
+
+    if (!base) return fallback;
+    return `${toTitleCase(base)} Portal`;
+  } catch {
+    return fallback;
+  }
+}
+
+function Notice({
+  tone = 'error',
+  children,
 }: {
-  identitySource: string;
-  returnTarget: string;
+  tone?: 'error' | 'warning';
+  children: ReactNode;
 }) {
   return (
-    <div className="relative hidden overflow-hidden rounded-[2rem] border border-white/50 bg-[#13212a] p-8 text-white shadow-[0_30px_80px_rgba(19,33,42,0.35)] lg:flex lg:min-h-[620px] lg:flex-col lg:justify-between">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.22),transparent_32%),radial-gradient(circle_at_80%_20%,rgba(96,165,250,0.18),transparent_28%),linear-gradient(180deg,rgba(255,255,255,0.04),rgba(255,255,255,0))]" />
-      <div className="relative space-y-8">
-        <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/8 px-3 py-1 text-xs uppercase tracking-[0.28em] text-white/72">
-          <ShieldCheck className="size-3.5" />
-          Single Sign-On
-        </div>
+    <div
+      className={
+        tone === 'warning'
+          ? 'rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900'
+          : 'rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700'
+      }
+    >
+      {children}
+    </div>
+  );
+}
 
-        <div className="space-y-4">
-          <p className="font-serif text-4xl leading-tight text-white">
-            One sign-in surface for every approved organization app.
-          </p>
-          <p className="max-w-md text-sm leading-6 text-slate-200/84">
-            This page is dedicated to SSO entry only. Authentication is centralized here,
-            then control returns to the requesting application.
-          </p>
-        </div>
-
-        <div className="grid gap-3">
-          <div className="rounded-2xl border border-white/12 bg-white/6 p-4 backdrop-blur-sm">
-            <p className="text-xs uppercase tracking-[0.22em] text-white/55">Identity source</p>
-            <p className="mt-2 text-lg font-medium text-white">{identitySource}</p>
-          </div>
-          <div className="rounded-2xl border border-white/12 bg-white/6 p-4 backdrop-blur-sm">
-            <p className="text-xs uppercase tracking-[0.22em] text-white/55">Return target</p>
-            <p className="mt-2 text-lg font-medium text-white">{returnTarget}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="relative grid gap-4 text-sm text-slate-200/84">
-        <div className="flex items-start gap-3">
-          <KeyRound className="mt-0.5 size-4 text-amber-300" />
-          <div>
-            <p className="font-medium text-white">Provider-driven flow</p>
-            <p>Supports direct redirects and credential challenges from the identity layer.</p>
-          </div>
-        </div>
-        <div className="flex items-start gap-3">
-          <Workflow className="mt-0.5 size-4 text-sky-300" />
-          <div>
-            <p className="font-medium text-white">Return to origin</p>
-            <p>Users are sent back to the app that initiated the sign-in sequence.</p>
-          </div>
-        </div>
-      </div>
+function MetaItem({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="space-y-1">
+      <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-500">{label}</p>
+      <p className="text-sm text-slate-700">{value}</p>
     </div>
   );
 }
 
 export default function Login() {
+  const [showPassword, setShowPassword] = useState(false);
   const { app, appDSN, isLoading: isAppLoading, error: appError } = useDefaultApp();
   const {
     redirect,
@@ -97,143 +104,177 @@ export default function Login() {
   const loginUrl = `/api/login?dsn=${encodeURIComponent(dsn)}&redirect=${encodeURIComponent(redirect)}`;
   const identitySource = getDisplayLabel(appDSN ?? window.location.origin);
   const returnTarget = getDisplayLabel(redirect);
+  const leftPortalLabel = getPortalLabel(window.location.origin, 'Modern Portal');
+  const rightPortalLabel = getPortalLabel(appDSN, 'SSO Portal');
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#f4efe5] px-4 py-6 text-slate-950 dark:bg-[#0d1720] dark:text-slate-100 sm:px-6 lg:px-8">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(251,191,36,0.16),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.12),transparent_28%)]" />
-      <div className="relative mx-auto grid min-h-[calc(100vh-3rem)] w-full max-w-7xl gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <SecurityRail identitySource={identitySource} returnTarget={returnTarget} />
-
-        <div className="flex items-center justify-center">
-          <div className="w-full max-w-xl rounded-[2rem] border border-slate-900/10 bg-white/88 p-6 shadow-[0_24px_70px_rgba(15,23,42,0.12)] backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/78 dark:shadow-[0_24px_70px_rgba(2,6,23,0.55)] sm:p-8">
-            <div className="space-y-6">
-              <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-slate-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
-                  <LockKeyhole className="size-3.5" />
-                  Secure Access
+    <div className="min-h-screen bg-[#f5f7fb] px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl items-center justify-center">
+        <Card className="w-full max-w-5xl overflow-hidden rounded-[24px] border border-slate-200 bg-white py-0 shadow-[0_14px_36px_rgba(15,23,42,0.08)]">
+          <div className="grid min-h-[580px] lg:grid-cols-[1.05fr_0.95fr]">
+            <section className="flex flex-col justify-between bg-[#1b2740] px-8 py-10 text-white sm:px-10 lg:px-12">
+              <div className="space-y-10">
+                <div className="flex items-center gap-3 text-lg font-semibold">
+                  <Shield className="size-4.5" />
+                  <span>{leftPortalLabel}</span>
                 </div>
 
-                <div className="space-y-3">
-                  <h1 className="font-serif text-4xl leading-tight text-slate-950 dark:text-white sm:text-5xl">
-                    {hasChallenge
-                      ? 'Confirm your organization credentials'
-                      : 'Sign in through your SSO provider'}
+                <div className="max-w-md space-y-5">
+                  <h1 className="text-4xl font-semibold tracking-tight sm:text-[2.65rem]">
+                    Sign in to continue.
                   </h1>
-                  <p className="max-w-lg text-sm leading-6 text-slate-600 dark:text-slate-400">
+                  <p className="text-lg leading-8 text-slate-200">
+                    Centralized access to payroll, leave, support, internal tools, and
+                    approved organization applications.
+                  </p>
+                </div>
+
+                <div className="max-w-md rounded-2xl border border-white/10 bg-white/8 px-5 py-4 text-sm leading-7 text-slate-200">
+                  Tip: Use your official account. If additional verification is required,
+                  complete it here before continuing.
+                </div>
+              </div>
+
+              <div className="grid gap-4 pt-8 text-slate-300 sm:grid-cols-2">
+                <MetaItem label="Identity source" value={identitySource} />
+                <MetaItem label="Return target" value={returnTarget} />
+              </div>
+            </section>
+
+            <section className="flex flex-col justify-between px-8 py-10 sm:px-10 lg:px-12">
+              <div className="space-y-8">
+                <div className="flex items-center gap-3 text-lg font-semibold text-slate-900">
+                  <Shield className="size-4.5" />
+                  <span>{rightPortalLabel}</span>
+                </div>
+
+                <div className="space-y-2">
+                  <h2 className="text-4xl font-semibold tracking-tight text-slate-950">Log in</h2>
+                  <p className="max-w-sm text-base leading-7 text-slate-600">
                     {hasChallenge
-                      ? 'A password challenge is required to complete this authentication flow.'
-                      : 'Use this page as the dedicated SSO entry point for your application access.'}
+                      ? 'Enter your credentials to complete access to the portal.'
+                      : 'Continue with your identity provider to access the portal.'}
                   </p>
                 </div>
+
+                {appError ? <Notice tone="warning">{appError}</Notice> : null}
+                {errorMessage ? <Notice>{errorMessage}</Notice> : null}
+
+                {hasChallenge ? (
+                  <form onSubmit={handleSubmit} className="space-y-5">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-slate-700" htmlFor="identifier">
+                        User ID
+                      </label>
+                      <Input
+                        id="identifier"
+                        name="identifier"
+                        type="text"
+                        autoComplete="username"
+                        placeholder="Enter your username or email"
+                        required
+                        className="h-12 rounded-xl border-slate-200 bg-white px-4 shadow-sm focus-visible:ring-[#2f56d3]/20"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-slate-700" htmlFor="password">
+                        Password
+                      </label>
+                      <div className="relative">
+                        <Input
+                          id="password"
+                          name="password"
+                          type={showPassword ? 'text' : 'password'}
+                          autoComplete="current-password"
+                          placeholder="Enter your password"
+                          required
+                          className="h-12 rounded-xl border-slate-200 bg-white px-4 pr-12 shadow-sm focus-visible:ring-[#2f56d3]/20"
+                        />
+                        <button
+                          type="button"
+                          className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-slate-500 transition hover:text-slate-700"
+                          onClick={() => setShowPassword((value) => !value)}
+                          aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="size-4" />
+                          ) : (
+                            <Eye className="size-4" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    {submitError ? <Notice>{submitError}</Notice> : null}
+
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="h-12 w-full rounded-xl bg-[#2f56d3] text-base font-medium text-white shadow-sm hover:bg-[#294cc0]"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <LoaderCircle className="size-4 animate-spin" />
+                          Signing in
+                        </>
+                      ) : (
+                        <>
+                          Sign in
+                          <ArrowRight className="size-4" />
+                        </>
+                      )}
+                    </Button>
+                  </form>
+                ) : (
+                  <div className="space-y-5">
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-7 text-slate-600">
+                      Authentication will continue on your configured identity provider. Once
+                      approved, you will be returned to the requesting application.
+                    </div>
+
+                    <Button
+                      size="lg"
+                      className="h-12 w-full rounded-xl bg-[#2f56d3] text-base font-medium text-white shadow-sm hover:bg-[#294cc0]"
+                      disabled={isAppLoading}
+                      onClick={() => {
+                        if (loginUrl) {
+                          window.location.assign(loginUrl);
+                        }
+                      }}
+                    >
+                      {isAppLoading ? (
+                        <>
+                          <LoaderCircle className="size-4 animate-spin" />
+                          Loading configuration
+                        </>
+                      ) : (
+                        <>
+                          Continue with SSO
+                          <ArrowRight className="size-4" />
+                        </>
+                      )}
+                    </Button>
+
+                    <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
+                      Password recovery and secondary verification are handled by your identity
+                      provider.
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="grid gap-3 rounded-3xl border border-slate-200/80 bg-slate-50/80 p-4 dark:border-slate-800 dark:bg-slate-900/70">
-                <div className="flex items-center justify-between gap-4 text-sm">
-                  <span className="text-slate-500 dark:text-slate-400">Identity source</span>
-                  <span className="font-medium text-slate-900 dark:text-slate-100">{identitySource}</span>
+              <div className="flex items-center justify-between gap-4 pt-8 text-sm text-slate-500">
+                <div className="flex items-center gap-2">
+                  <LockKeyhole className="size-4" />
+                  <span>Protected sign-in flow</span>
                 </div>
-                <div className="flex items-center justify-between gap-4 text-sm">
-                  <span className="text-slate-500 dark:text-slate-400">Return target</span>
-                  <span className="font-medium text-slate-900 dark:text-slate-100">{returnTarget}</span>
-                </div>
+                <span>SSO</span>
               </div>
-
-              {appError ? (
-                <div className="rounded-2xl border border-amber-300/70 bg-amber-50 px-4 py-3 text-sm text-amber-950 dark:border-amber-600/40 dark:bg-amber-500/10 dark:text-amber-100">
-                  {appError}
-                </div>
-              ) : null}
-
-              {hasChallenge ? (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {errorMessage ? (
-                    <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800/60 dark:bg-red-950/40 dark:text-red-200">
-                      {errorMessage}
-                    </div>
-                  ) : null}
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300" htmlFor="identifier">
-                      Email or username
-                    </label>
-                    <Input
-                      id="identifier"
-                      name="identifier"
-                      type="text"
-                      autoComplete="username"
-                      required
-                      className="h-11 rounded-xl border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-950"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300" htmlFor="password">
-                      Password
-                    </label>
-                    <Input
-                      id="password"
-                      name="password"
-                      type="password"
-                      autoComplete="current-password"
-                      required
-                      className="h-11 rounded-xl border-slate-300 bg-white dark:border-slate-800 dark:bg-slate-950"
-                    />
-                  </div>
-
-                  <Button type="submit" size="lg" className="h-11 w-full rounded-xl text-sm" disabled={isSubmitting}>
-                    {isSubmitting ? (
-                      <>
-                        <LoaderCircle className="size-4 animate-spin" />
-                        Signing in
-                      </>
-                    ) : (
-                      <>
-                        Continue
-                        <ArrowRight className="size-4" />
-                      </>
-                    )}
-                  </Button>
-
-                  {submitError ? (
-                    <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800/60 dark:bg-red-950/40 dark:text-red-200">
-                      {submitError}
-                    </div>
-                  ) : null}
-                </form>
-              ) : (
-                <div className="space-y-4">
-                  <Button
-                    size="lg"
-                    className="h-12 w-full rounded-xl text-sm"
-                    disabled={isAppLoading}
-                    onClick={() => {
-                      if (loginUrl) {
-                        window.location.assign(loginUrl);
-                      }
-                    }}
-                  >
-                    {isAppLoading ? (
-                      <>
-                        <LoaderCircle className="size-4 animate-spin" />
-                        Loading SSO configuration
-                      </>
-                    ) : (
-                      <>
-                        Continue with SSO
-                        <ArrowRight className="size-4" />
-                      </>
-                    )}
-                  </Button>
-
-                  <p className="text-sm leading-6 text-slate-500 dark:text-slate-400">
-                    You will be redirected to your identity provider. After successful
-                    authentication, access returns to the requesting application.
-                  </p>
-                </div>
-              )}
-            </div>
+            </section>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );
