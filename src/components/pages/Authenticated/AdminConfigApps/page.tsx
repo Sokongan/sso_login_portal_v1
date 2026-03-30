@@ -127,20 +127,8 @@ export default function AdminConfigAppsPage() {
   const hasApps = useMemo(() => apps.length > 0, [apps.length]);
 
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-          <div className="flex items-center gap-2 px-6">
-            <SidebarTrigger className="-ml-1" />
-            <Separator
-              orientation="vertical"
-              className="mr-2 data-[orientation=vertical]:h-4"
-            />
-            <h1 className="text-base font-medium">Config</h1>
-          </div>
-        </header>
-        <div className="flex flex-1 flex-col gap-4 px-6 pb-6 pt-0">
+    <>
+<div className="flex flex-1 flex-col gap-4 px-6 pb-6 pt-0">
           <section className="grid gap-6">
             <div className="rounded-2xl border border-slate-200 bg-white/90 p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
               <div>
@@ -217,7 +205,6 @@ export default function AdminConfigAppsPage() {
             </div>
           </section>
         </div>
-      </SidebarInset>
 
       <Dialog open={Boolean(editingApp)} onOpenChange={(open) => !open && setEditingApp(null)}>
         <DialogContent>
@@ -267,6 +254,7 @@ export default function AdminConfigAppsPage() {
           ) : null}
         </DialogContent>
       </Dialog>
-    </SidebarProvider>
+    </>
+        
   );
 }
