@@ -10,7 +10,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { usePagination } from "@/hooks/usePagination";
+import { usePagination } from "@/hooks/birthday/usePagination";
 import { LeaveApplicationForm } from "./LeaveApplicationForm";
 
 const approvedApplications = [

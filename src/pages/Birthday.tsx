@@ -1,4 +1,4 @@
-import { useBirthdays } from "@/hooks/useBirthdays"
+import { useBirthdays } from "@/hooks/birthday/useBirthdays"
 import {
   getTodaysBirthdays,
   getUpcomingBirthdays,
