@@ -1,7 +1,4 @@
-"use client"
-
-import * as React from "react"
-import { MoreVertical, type LucideIcon } from "lucide-react"
+import { ChevronRight } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 
 import {
@@ -19,22 +16,9 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
+import type { SidebarNavProps } from "@/types"
 
-export function NavSecondary({
-  items,
-  ...props
-}: {
-  items: {
-    title: string
-    url: string
-    icon?: LucideIcon
-    items?: {
-      title: string
-      url: string
-      icon?: LucideIcon
-    }[]
-  }[]
-} & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
+export function NavSecondary({ items, ...props }: SidebarNavProps) {
   const location = useLocation()
 
   const isRouteActive = (to: string) => {
@@ -52,9 +36,10 @@ export function NavSecondary({
 
             if (!hasChildren) {
               return (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.label}>
                   <SidebarMenuButton
                     asChild
+                    tooltip={item.label}
                     isActive={isActive}
                     className="group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:-ml-1"
                   >
@@ -62,7 +47,7 @@ export function NavSecondary({
                       {item.icon ? (
                         <item.icon className="size-4 shrink-0" />
                       ) : null}
-                      <span>{item.title}</span>
+                      <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -71,7 +56,7 @@ export function NavSecondary({
 
             return (
               <Collapsible
-                key={item.title}
+                key={item.label}
                 asChild
                 defaultOpen={isActive}
                 className="group/collapsible"
@@ -79,26 +64,27 @@ export function NavSecondary({
                 <SidebarMenuItem>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton
+                      tooltip={item.label}
                       isActive={isActive}
                       className="group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:-ml-1"
                     >
                       {item.icon ? (
                         <item.icon className="size-4 shrink-0" />
                       ) : null}
-                      <span>{item.title}</span>
-                      <MoreVertical className="ml-auto group-data-[collapsible=icon]:hidden" />
+                      <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
+                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" />
                     </SidebarMenuButton>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       {item.items?.map((subItem) => (
-                        <SidebarMenuSubItem key={subItem.title}>
+                        <SidebarMenuSubItem key={subItem.label}>
                           <SidebarMenuSubButton asChild>
                             <NavLink to={subItem.url}>
                               {subItem.icon ? (
                                 <subItem.icon className="size-4 shrink-0" />
                               ) : null}
-                              <span>{subItem.title}</span>
+                              <span>{subItem.label}</span>
                             </NavLink>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>

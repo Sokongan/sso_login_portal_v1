@@ -1,9 +1,14 @@
-"use client"
 
 import {
-  LayoutGrid,
   Shield,
   Settings,
+  CalendarClock,
+  ClipboardList,
+  LayoutDashboard,
+  PiggyBank,
+  Package,
+  Wallet,
+  FileCheck,
 } from "lucide-react"
 
 import {
@@ -14,50 +19,53 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from "@/components/ui/sidebar"
-import { NavMain } from "./nav-main"
-import { NavSecondary } from "./nav-secondary"
-import { NavUser } from "./user-account"
+
+import type { NavItem } from "@/types"
+import { NavMain } from "./nav-Main"
+import { NavSecondary } from "./nav-Secondary"
+import { NavUser } from "./userAccount"
+
+
 
 const navMain = [
-  {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: LayoutGrid,
-  },
-]
+      { url: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { url: "/payslip", label: "Payslip", icon: Wallet },
+      { url: "/provident-fund", label: "Provident Fund", icon: PiggyBank },
+      { url: "/issued-equipment", label: "Issued Equipment", icon: Package },
+      { url: "/saln", label: "SALN", icon: FileCheck },
+      { url: "/request", label: "Request", icon: ClipboardList },
+      { url: "/leave", label: "Leave", icon: CalendarClock },
+
+] satisfies NavItem[]
 
 const navSecondary = [
   {
-    title: "Administration",
+    label: "Administration",
     url: "/admin",
     icon: Shield,
   },
   {
-    title: "Config",
+    label: "Config",
     url: "/admin/config",
     icon: Settings,
     items: [
       {
-        title: "Roles & permissions",
+        label: "Roles & permissions",
         url: "/admin/config/roles",
         icon: Settings,
       },
       {
-        title: "App access",
+        label: "App access",
         url: "/admin/config/apps",
         icon: Settings,
       },
     ],
   },
-]
+] satisfies NavItem[]
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar
-      collapsible="icon"
-      className="overflow-hidden border-r border-slate-200/80 dark:border-slate-800/80"
-      {...props}
-    >
+    <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="px-4 py-6">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-900 text-xs font-semibold uppercase tracking-[0.2em] text-white dark:bg-slate-100 dark:text-slate-900 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:-ml-3">
@@ -65,10 +73,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
           </div>
           <div className="space-y-0.5 group-data-[collapsible=icon]:hidden">
             <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-              Portal Nav
-            </p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Admin + account
+              MyDOJ Portal
             </p>
           </div>
         </div>
@@ -81,7 +86,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter className="px-4 pb-4">
         <NavUser />
       </SidebarFooter>
-      <SidebarRail />
+       <SidebarRail />
     </Sidebar>
   )
 }

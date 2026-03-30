@@ -45,7 +45,7 @@ export function useLoginForm(options: UseLoginFormOptions = {}): UseLoginFormSta
       ?.value ?? '';
 
     try {
-      const response = await fetch('/api/kratos/login/submit', {
+      const response = await fetch('/api/identity/login/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

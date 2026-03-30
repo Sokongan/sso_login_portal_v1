@@ -54,6 +54,6 @@ export function listAdminIdentities(params?: {
     search.set('include_kratos_sessions', String(params.include_kratos_sessions));
   }
   const query = search.toString();
-  const url = query.length > 0 ? `/api/kratos/admin/identities?${query}` : '/api/kratos/admin/identities';
+  const url = query.length > 0 ? `/api/admin/identities?${query}` : '/api/admin/identities';
   return apiGet<AdminIdentitiesResponse>(url);
 }

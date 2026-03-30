@@ -23,7 +23,7 @@ export async function checkTupleAccess(tuple: Tuple) {
   });
 
   const { response, data } = await apiGet<AdminCheckResponse>(
-    `/api/keto/check?${params.toString()}`
+    `/api/permissions/check?${params.toString()}`
   );
 
   const allowed = Boolean(
@@ -34,7 +34,7 @@ export async function checkTupleAccess(tuple: Tuple) {
 }
 
 export async function writeTuple(tuple: Tuple) {
-  const { response } = await apiPost<unknown>('/api/keto/tuples', tuple);
+  const { response } = await apiPost<unknown>('/api/permissions/tuple', tuple);
 
   return response.ok;
 }

@@ -1,6 +1,6 @@
 
 import { useEffect, useMemo, useState } from "react"
-import { AppSidebar } from "@/components/layout/AppSidebar"
+import { AppSidebar } from '@/components/layout/sidebar/Sidebar';
 import { Button } from "@/components/ui/button"
 import {
   Card,

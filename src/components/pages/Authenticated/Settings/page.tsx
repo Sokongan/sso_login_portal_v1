@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { AppSidebar } from '@/components/layout/AppSidebar';
+import { AppSidebar } from '@/components/layout/sidebar/Sidebar';
 import { Separator } from '@/components/ui/separator';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { useSettingsForm } from '@/hooks/settings/useSettingsForm';
