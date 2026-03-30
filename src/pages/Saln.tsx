@@ -213,7 +213,7 @@ export function SalnPage() {
         </CardHeader>
         <CardContent>
           <Table>
-            <TableHeader>
+            <TableHeader> 
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Date of Birth</TableHead>

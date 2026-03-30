@@ -12,6 +12,11 @@ import Leave from "./pages/Leave";
 import { AuthGate } from "./components/auth/AuthGate";
 import LoginPage from "./components/pages/Login/page";
 import CallbackPage from "./components/pages/Callback/page";
+import AdminPage from "./components/pages/Authenticated/Admin/page";
+import AdminConfigAppsPage from "./components/pages/Authenticated/AdminConfigApps/page";
+import AdminConfigRolesPage from "./components/pages/Authenticated/AdminConfigRoles/page";
+import AdminUsersCreatePage from "./components/pages/Authenticated/AdminUsersCreate/page";
+import AccountSettingsPage from "./components/pages/Authenticated/Settings/page";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -61,11 +66,12 @@ export default function App() {
           <Route path="request" element={<RequestPage />} />
           <Route path="leave" element={<Leave/>} />
           <Route path="support" element={<PlaceholderPage title="Support" />} />
-          <Route path="settings" element={<PlaceholderPage title="Settings" />} />
-          <Route path="admin" element={<PlaceholderPage title="Administration" />} />
-          <Route path="admin/config" element={<PlaceholderPage title="Config" />} />
-          <Route path="admin/config/roles" element={<PlaceholderPage title="Roles & permissions" />} />
-          <Route path="admin/config/apps" element={<PlaceholderPage title="App access" />} />
+          <Route path="settings" element={<AccountSettingsPage />} />
+          <Route path="admin" element={<AdminPage />} />
+          <Route path="admin/users/new" element={<AdminUsersCreatePage />} />
+          <Route path="admin/config" element={<Navigate to="/admin/config/roles" replace />} />
+          <Route path="admin/config/roles" element={<AdminConfigRolesPage />} />
+          <Route path="admin/config/apps" element={<AdminConfigAppsPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/sidebar"
 
 import type { NavItem } from "@/types"
+import { useSession } from "@/context/SessionContext"
 import { NavMain } from "./nav-Main"
 import { NavSecondary } from "./nav-Secondary"
 import { NavUser } from "./userAccount"
@@ -43,6 +44,18 @@ const navSecondary = [
     label: "Administration",
     url: "/admin",
     icon: Shield,
+    items: [
+      {
+        label: "Dashboard",
+        url: "/admin",
+        icon: Shield,
+      },
+      {
+        label: "Create user",
+        url: "/admin/users/new",
+        icon: Shield,
+      },
+    ],
   },
   {
     label: "Config",
@@ -64,6 +77,8 @@ const navSecondary = [
 ] satisfies NavItem[]
 
 export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
+  const { isPortalAdmin } = useSession()
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="px-4 py-6">
@@ -81,7 +96,9 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       <SidebarSeparator className="mx-4 w-auto" />
       <SidebarContent className="px-2 pb-4">
         <NavMain items={navMain} />
-        <NavSecondary items={navSecondary} className="mt-auto" />
+        {isPortalAdmin ? (
+          <NavSecondary items={navSecondary} className="mt-auto" />
+        ) : null}
       </SidebarContent>
       <SidebarFooter className="px-4 pb-4">
         <NavUser />

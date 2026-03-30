@@ -47,4 +47,8 @@ export const routeMeta: Record<string, { title: string; description: string }> =
     title: "App access",
     description: "Manage module-level access by role and policy.",
   },
+  "/admin/users/new": {
+    title: "Create user",
+    description: "Create a user account and assign tuple-based roles.",
+  },
 };

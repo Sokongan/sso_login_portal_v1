@@ -39,6 +39,7 @@ type SessionContextValue = {
   profile: Profile | null;
   displayName: string | null;
   roles: { object: string; role: string }[];
+  isPortalAdmin: boolean;
   isAuthenticated: boolean;
   isLoading: boolean;
   checkSession: () => Promise<void>;
@@ -184,6 +185,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     return null;
   }, [profile]);
 
+  const isPortalAdmin = useMemo(() => {
+    return (session?.roles ?? []).some(
+      (role) => role.object === 'sso-portal' && role.role === 'admin'
+    );
+  }, [session?.roles]);
+
   const value = useMemo(
     () => ({
       session,
@@ -191,6 +198,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       profile,
       displayName,
       roles: session?.roles ?? [],
+      isPortalAdmin,
       isAuthenticated: session?.authenticated === true,
       isLoading,
       checkSession,
@@ -202,6 +210,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       identityId,
       profile,
       displayName,
+      isPortalAdmin,
       isLoading,
       checkSession,
       refreshSession,
