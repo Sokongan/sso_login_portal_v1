@@ -93,7 +93,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
           </div>
         </div>
       </SidebarHeader>
-      <SidebarSeparator className="mx-4 w-auto group-data-[collapsible=icon]:mx-2" />
+      <SidebarSeparator className="mx-0 w-auto group-data-[collapsible=icon]:mx-1" />
       <SidebarContent className="px-2 pb-4">
         <NavMain items={navMain} />
         {isPortalAdmin ? (
