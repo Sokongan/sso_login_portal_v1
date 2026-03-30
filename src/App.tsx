@@ -1,172 +1,70 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Login from './components/pages/Login/page';
-import Dashboard from './components/pages/Authenticated/Dashboard/page';
-import AdminPage from './components/pages/Authenticated/Admin/page';
-import AdminUsersCreatePage from './components/pages/Authenticated/AdminUsersCreate/page';
-import AdminConfigRolesPage from './components/pages/Authenticated/AdminConfigRoles/page';
-import AdminConfigAppsPage from './components/pages/Authenticated/AdminConfigApps/page';
-import AccountSettingsPage from './components/pages/Authenticated/Settings/page';
-import Callback from './components/pages/Callback/page';
-// import Consent from './components/pages/Consent/page';
-import { SessionProvider, useSession } from './context/SessionContext';
-import ErrorPage from './components/pages/Error/page';
-import { ThemeProvider } from './components/theme-provider';
-import { useEffect } from 'react';
-import type { JSX } from 'react';
-import { AuthGate } from './components/auth/AuthGate';
-import { useDefaultApp } from './hooks/auth/useDefaultApp';
+import { useEffect } from "react";
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { LoginPage } from "./pages/Login";
+import { DashboardPage } from "./pages/Dashboard";
+import { AppLayout } from "./components/layout/AppLayout";
+import { FormsPage } from "./pages/Forms";
+import { BirthdayPage } from "./pages/Birthday";
+import { ProvidentFundPage } from "./pages/ProvidentFund";
+import { IssuedEquipmentPage } from "./pages/IssuedEquipment";
+import { RequestPage } from "./pages/Request";
+import { SalnPage } from "./pages/Saln";
+import Leave from "./pages/Leave";
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
 
-function LoadingScreen() {
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [pathname]);
+
+  return null;
+}
+
+function PlaceholderPage({ title }: { title: string }) {
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+    <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-6">
+      <h1 className="text-xl font-semibold text-slate-900">{title}</h1>
+      <p className="mt-2 text-sm text-slate-600">This module is ready for implementation.</p>
     </div>
   );
 }
 
-function AuthenticatedRedirect({ to }: { to: string }) {
-  useEffect(() => {
-    window.location.assign(to);
-  }, [to]);
+export default function App() {
+  const isAuthed = true;
 
-  return <LoadingScreen />;
-}
-
-function RedirectIfAuthed({ children }: { children: JSX.Element }) {
-  const { isAuthenticated, isLoading } = useSession();
-  const { redirectPath, isLoading: isAppLoading } = useDefaultApp();
-
-  const nextTarget = redirectPath || '/dashboard';
-
-  if (isLoading) {
-    return <LoadingScreen />;
-  }
-
-  if (isAuthenticated) {
-    if (isAppLoading) {
-      return <LoadingScreen />;
-    }
-
-    let redirectUrl: URL;
-    try {
-      redirectUrl = new URL(nextTarget, window.location.origin);
-    } catch {
-      return <Navigate to="/dashboard" replace />;
-    }
-
-    if (redirectUrl.origin === window.location.origin) {
-      const nextPath = `${redirectUrl.pathname}${redirectUrl.search}${redirectUrl.hash}`;
-      return <Navigate to={nextPath} replace />;
-    }
-    return <AuthenticatedRedirect to={redirectUrl.toString()} />;
-  }
-
-  return children;
-}
-
-function App() {
   return (
-  <ThemeProvider defaultTheme="system" storageKey="sso-ui-theme">
-      <SessionProvider>
-        <Router>
-          <div className="App">
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <RedirectIfAuthed>
-                    <Login />
-                  </RedirectIfAuthed>
-                }
-              />
-              <Route
-                path="/login"
-                element={
-                  <RedirectIfAuthed>
-                    <Login />
-                  </RedirectIfAuthed>
-                }
-              />
-              <Route path="/callback" element={<Callback />} />
-              {/* <Route path="/consent" element={<Consent />} /> */}
-              <Route
-                path="/dashboard"
-                element={
-                  <AuthGate
-                    title="Session required"
-                    subtitle="Sign in with your SSO account to access the dashboard."
-                  >
-                    <Dashboard />
-                  </AuthGate>
-                }
-              />
-              <Route
-                path="/settings"
-                element={
-                  <AuthGate
-                    title="Session required"
-                    subtitle="Sign in with your SSO account to manage your identity settings."
-                  >
-                    <AccountSettingsPage />
-                  </AuthGate>
-                }
-              />
-              <Route
-                path="/admin"
-                element={
-                  <AuthGate
-                    title="Session required"
-                    subtitle="Sign in with your SSO account to access the admin console."
-                  >
-                    <AdminPage />
-                  </AuthGate>
-                }
-              />
-              <Route
-                path="/admin/users/new"
-                element={
-                  <AuthGate
-                    title="Session required"
-                    subtitle="Sign in with your SSO account to create admin users."
-                  >
-                    <AdminUsersCreatePage />
-                  </AuthGate>
-                }
-              />
-              <Route
-                path="/admin/config"
-                element={<Navigate to="/admin/config/roles" replace />}
-              />
-              <Route
-                path="/admin/config/roles"
-                element={
-                  <AuthGate
-                    title="Session required"
-                    subtitle="Sign in with your SSO account to manage roles and permissions."
-                  >
-                    <AdminConfigRolesPage />
-                  </AuthGate>
-                }
-              />
-              <Route
-                path="/admin/config/apps"
-                element={
-                  <AuthGate
-                    title="Session required"
-                    subtitle="Sign in with your SSO account to manage app access."
-                  >
-                    <AdminConfigAppsPage />
-                  </AuthGate>
-                }
-              />
-              <Route path="/flow/error" element={<ErrorPage />} />
-            </Routes>
-          </div>
-        </Router>
-      </SessionProvider>
-    </ThemeProvider>
+    <BrowserRouter>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+
+        <Route
+          path="/"
+          element={isAuthed ? <AppLayout /> : <Navigate to="/login" replace />}
+        >
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="email" element={<PlaceholderPage title="Email" />} />
+          <Route path="directory" element={<PlaceholderPage title="Directory" />} />
+          <Route path="forms" element={<FormsPage /> } />
+          <Route path="birthday" element={<BirthdayPage /> } />
+          <Route path="payslip" element={<PlaceholderPage title="Payslip" />} />
+          <Route path="provident-fund" element={<ProvidentFundPage />} />
+          <Route path="issued-equipment" element={<IssuedEquipmentPage />} />
+          <Route path="saln" element={<SalnPage />} />
+          <Route path="request" element={<RequestPage />} />
+          <Route path="leave" element={<Leave/>} />
+          <Route path="support" element={<PlaceholderPage title="Support" />} />
+          <Route path="settings" element={<PlaceholderPage title="Settings" />} />
+          <Route path="admin" element={<PlaceholderPage title="Administration" />} />
+          <Route path="admin/config" element={<PlaceholderPage title="Config" />} />
+          <Route path="admin/config/roles" element={<PlaceholderPage title="Roles & permissions" />} />
+          <Route path="admin/config/apps" element={<PlaceholderPage title="App access" />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to={isAuthed ? "/dashboard" : "/login"} replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
-
-export default App;

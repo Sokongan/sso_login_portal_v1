@@ -102,52 +102,32 @@ export default function Login() {
 
   const dsn = appDSN ?? window.location.origin;
   const loginUrl = `/api/login?dsn=${encodeURIComponent(dsn)}&redirect=${encodeURIComponent(redirect)}`;
-  const identitySource = getDisplayLabel(appDSN ?? window.location.origin);
-  const returnTarget = getDisplayLabel(redirect);
-  const leftPortalLabel = getPortalLabel(window.location.origin, 'Modern Portal');
-  const rightPortalLabel = getPortalLabel(appDSN, 'SSO Portal');
 
   return (
-    <div className="min-h-screen bg-[#f5f7fb] px-4 py-8 text-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl items-center justify-center">
-        <Card className="w-full max-w-5xl overflow-hidden rounded-[24px] border border-slate-200 bg-white py-0 shadow-[0_14px_36px_rgba(15,23,42,0.08)]">
+    <div className="min-h-screen bg-slate-50">
+      <div className="mx-auto flex min-h-screen max-w-6xl items-center justify-center px-4">
+        <Card className="grid w-full overflow-hidden md:grid-cols-2">
+                 {/* Left: brand */}
           <div className="grid min-h-[580px] lg:grid-cols-[1.05fr_0.95fr]">
-            <section className="flex flex-col justify-between bg-[#1b2740] px-8 py-10 text-white sm:px-10 lg:px-12">
-              <div className="space-y-10">
-                <div className="flex items-center gap-3 text-lg font-semibold">
-                  <Shield className="size-4.5" />
-                  <span>{leftPortalLabel}</span>
-                </div>
+            <div className="hidden bg-gradient-to-br from-slate-900 to-slate-700 p-10 text-white md:block">
+             
 
-                <div className="max-w-md space-y-5">
-                  <h1 className="text-4xl font-semibold tracking-tight sm:text-[2.65rem]">
-                    Sign in to continue.
-                  </h1>
-                  <p className="text-lg leading-8 text-slate-200">
-                    Centralized access to payroll, leave, support, internal tools, and
-                    approved organization applications.
-                  </p>
-                </div>
-
-                <div className="max-w-md rounded-2xl border border-white/10 bg-white/8 px-5 py-4 text-sm leading-7 text-slate-200">
-                  Tip: Use your official account. If additional verification is required,
-                  complete it here before continuing.
-                </div>
+              <div className="mt-10 space-y-3">
+                <h1 className="text-3xl font-semibold leading-tight">
+                  Sign in to continue.
+                </h1>
+                <p className="text-white/80">
+                  Centralized access to payslip, leave, SALN, equipment, support, and internal links.
+                </p>
               </div>
 
-              <div className="grid gap-4 pt-8 text-slate-300 sm:grid-cols-2">
-                <MetaItem label="Identity source" value={identitySource} />
-                <MetaItem label="Return target" value={returnTarget} />
+              <div className="mt-10 rounded-xl border border-white/10 bg-white/5 p-4 text-sm text-white/80">
+                Tip: Use your official account. If you’re prompted for verification, complete it before continuing.
               </div>
-            </section>
+            </div>
 
             <section className="flex flex-col justify-between px-8 py-10 sm:px-10 lg:px-12">
               <div className="space-y-8">
-                <div className="flex items-center gap-3 text-lg font-semibold text-slate-900">
-                  <Shield className="size-4.5" />
-                  <span>{rightPortalLabel}</span>
-                </div>
-
                 <div className="space-y-2">
                   <h2 className="text-4xl font-semibold tracking-tight text-slate-950">Log in</h2>
                   <p className="max-w-sm text-base leading-7 text-slate-600">
@@ -171,7 +151,7 @@ export default function Login() {
                         name="identifier"
                         type="text"
                         autoComplete="username"
-                        placeholder="Enter your username or email"
+                        placeholder="Enter your USER ID e.g DOJ******"
                         required
                         className="h-12 rounded-xl border-slate-200 bg-white px-4 shadow-sm focus-visible:ring-[#2f56d3]/20"
                       />
@@ -205,7 +185,11 @@ export default function Login() {
                         </button>
                       </div>
                     </div>
-
+                    
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
+                      CAPTCHA placeholder (integrate reCAPTCHA here)
+                    </div>
+    
                     {submitError ? <Notice>{submitError}</Notice> : null}
 
                     <Button
