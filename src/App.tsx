@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { LoginPage } from "./pages/Login";
 import { DashboardPage } from "./pages/Dashboard";
 import { AppLayout } from "./components/layout/AppLayout";
 import { FormsPage } from "./pages/Forms";
@@ -10,6 +9,9 @@ import { IssuedEquipmentPage } from "./pages/IssuedEquipment";
 import { RequestPage } from "./pages/Request";
 import { SalnPage } from "./pages/Saln";
 import Leave from "./pages/Leave";
+import { AuthGate } from "./components/auth/AuthGate";
+import LoginPage from "./components/pages/Login/page";
+import CallbackPage from "./components/pages/Callback/page";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -31,17 +33,20 @@ function PlaceholderPage({ title }: { title: string }) {
 }
 
 export default function App() {
-  const isAuthed = true;
-
   return (
     <BrowserRouter>
       <ScrollToTop />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/callback" element={<CallbackPage />} />
 
         <Route
           path="/"
-          element={isAuthed ? <AppLayout /> : <Navigate to="/login" replace />}
+          element={
+            <AuthGate autoRedirect>
+              <AppLayout />
+            </AuthGate>
+          }
         >
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
@@ -63,7 +68,7 @@ export default function App() {
           <Route path="admin/config/apps" element={<PlaceholderPage title="App access" />} />
         </Route>
 
-        <Route path="*" element={<Navigate to={isAuthed ? "/dashboard" : "/login"} replace />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

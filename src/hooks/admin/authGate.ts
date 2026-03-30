@@ -38,5 +38,5 @@ export function useAuthGate({
     }
   }, [autoRedirect, isAuthenticated, isLoading, isAppLoading, handleLogin]);
 
-  return { isAuthenticated, isLoading, handleLogin };
+  return { isAuthenticated, isLoading: isLoading || isAppLoading, handleLogin };
 }

@@ -32,7 +32,7 @@ export default function AccountSettingsPage() {
     // totp: 'Authenticator app',
     // webauthn: 'Security keys',
     // lookup_secret: 'Recovery codes',
-    // oidc: 'Connected accounts',
+    oidc: 'Connected accounts',
   };
 
   const descriptionMap: Record<string, string> = {
@@ -41,7 +41,7 @@ export default function AccountSettingsPage() {
     // totp: 'Set up or manage time-based one-time passwords.',
     // webauthn: 'Manage WebAuthn security keys.',
     // lookup_secret: 'Regenerate or view recovery codes.',
-    // oidc: 'Manage linked identity providers.',
+    oidc: 'Manage linked identity providers.',
   };
 
   return (

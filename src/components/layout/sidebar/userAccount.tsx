@@ -31,15 +31,14 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { useSession } from "@/context/SessionContext"
+import { useTheme } from "@/components/theme-provider"
 
 
 export function NavUser() {
   const { isMobile } = useSidebar()
-  const { profile, logout } = useSession()
-
-  const name = profile?.name?.first_name
-    ? `${profile.name.first_name} ${profile.name.last_name ?? ""}`.trim()
-    : profile?.email ?? "User"
+  const { displayName, logout } = useSession()
+  const { setTheme } = useTheme()
+  const name = displayName ?? "Signed-in user"
 
   const initials = name
     .split(" ")
@@ -99,19 +98,19 @@ export function NavUser() {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem
-            //    onClick={() => setTheme("light")}
+               onClick={() => setTheme("light")}
                >
                 <Sun />
                 Light mode
               </DropdownMenuItem>
               <DropdownMenuItem 
-            //   onClick={() => setTheme("dark")}
+              onClick={() => setTheme("dark")}
               >
                 <Moon />
                 Dark mode
               </DropdownMenuItem>
               <DropdownMenuItem 
-            //   onClick={() => setTheme("system")}
+              onClick={() => setTheme("system")}
               >
                 <Monitor />
                 System theme
