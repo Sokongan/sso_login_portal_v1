@@ -29,13 +29,13 @@ import { NavUser } from "./userAccount"
 
 
 const navMain = [
-      { url: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { url: "/payslip", label: "Payslip", icon: Wallet },
-      { url: "/provident-fund", label: "Provident Fund", icon: PiggyBank },
-      { url: "/issued-equipment", label: "Issued Equipment", icon: Package },
-      { url: "/saln", label: "SALN", icon: FileCheck },
-      { url: "/request", label: "Request", icon: ClipboardList },
-      { url: "/leave", label: "Leave", icon: CalendarClock },
+  { url: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { url: "/payslip", label: "Payslip", icon: Wallet },
+  { url: "/provident-fund", label: "Provident Fund", icon: PiggyBank },
+  { url: "/issued-equipment", label: "Issued Equipment", icon: Package },
+  { url: "/saln", label: "SALN", icon: FileCheck },
+  { url: "/request", label: "Request", icon: ClipboardList },
+  { url: "/leave", label: "Leave", icon: CalendarClock },
 
 ] satisfies NavItem[]
 
@@ -93,7 +93,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
           </div>
         </div>
       </SidebarHeader>
-      <SidebarSeparator/>
+      <SidebarSeparator className="mx-4 w-auto group-data-[collapsible=icon]:mx-2" />
       <SidebarContent className="px-2 pb-4">
         <NavMain items={navMain} />
         {isPortalAdmin ? (
@@ -103,7 +103,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
       <SidebarFooter className="px-4 pb-4">
         <NavUser />
       </SidebarFooter>
-       <SidebarRail />
+      <SidebarRail />
     </Sidebar>
   )
 }
