@@ -11,7 +11,7 @@ export function useAuthGate({
   autoRedirect = false,
   redirectPath,
 }: UseAuthGate) {
-  const { isAuthenticated, isLoading } = useSession();
+  const { isAuthenticated, isLoading, authError, checkSession } = useSession();
   const { appDSN, redirectPath: appRedirectPath, isLoading: isAppLoading } =
     useDefaultApp();
 
@@ -28,11 +28,21 @@ export function useAuthGate({
     );
   }, [appDSN, redirectTarget]);
 
+  const retrySessionCheck = useCallback(() => {
+    void checkSession();
+  }, [checkSession]);
+
   useEffect(() => {
-    if (!isLoading && !isAppLoading && !isAuthenticated && autoRedirect) {
+    if (!isLoading && !isAppLoading && !authError && !isAuthenticated && autoRedirect) {
       handleLogin();
     }
-  }, [autoRedirect, isAuthenticated, isLoading, isAppLoading, handleLogin]);
+  }, [autoRedirect, isAuthenticated, isLoading, isAppLoading, authError, handleLogin]);
 
-  return { isAuthenticated, isLoading: isLoading || isAppLoading, handleLogin };
+  return {
+    isAuthenticated,
+    isLoading: isLoading || isAppLoading,
+    authError,
+    handleLogin,
+    retrySessionCheck,
+  };
 }
