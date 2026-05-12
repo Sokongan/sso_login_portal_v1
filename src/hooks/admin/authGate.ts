@@ -11,13 +11,9 @@ export function useAuthGate({
   autoRedirect = false,
   redirectPath,
 }: UseAuthGate) {
-  const { isAuthenticated, isLoading, checkSession } = useSession();
+  const { isAuthenticated, isLoading } = useSession();
   const { appDSN, redirectPath: appRedirectPath, isLoading: isAppLoading } =
     useDefaultApp();
-
-  useEffect(() => {
-    void checkSession();
-  }, [checkSession]);
 
   const redirectTarget = useMemo(() => {
     if (redirectPath) return redirectPath;

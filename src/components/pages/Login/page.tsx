@@ -1,9 +1,11 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { useSession } from '@/context/SessionContext';
 import { useDefaultApp } from '@/hooks/auth/useDefaultApp';
 import { useLoginForm } from '@/hooks/auth/useLoginForm';
+import { useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
   Eye,
@@ -87,7 +89,9 @@ function MetaItem({
 }
 
 export default function Login() {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const { isAuthenticated, isLoading: isSessionLoading } = useSession();
   const { app, appDSN, isLoading: isAppLoading, error: appError } = useDefaultApp();
   const {
     redirect,
@@ -102,6 +106,29 @@ export default function Login() {
 
   const dsn = appDSN ?? window.location.origin;
   const loginUrl = `/api/login?dsn=${encodeURIComponent(dsn)}&redirect=${encodeURIComponent(redirect)}`;
+
+  useEffect(() => {
+    if (isSessionLoading || hasChallenge || !isAuthenticated) return;
+
+    try {
+      const target = new URL(redirect, window.location.origin);
+      if (target.origin === window.location.origin) {
+        navigate(`${target.pathname}${target.search}${target.hash}`, { replace: true });
+        return;
+      }
+      window.location.assign(target.toString());
+    } catch {
+      navigate(redirect || '/dashboard', { replace: true });
+    }
+  }, [hasChallenge, isAuthenticated, isSessionLoading, navigate, redirect]);
+
+  if (isSessionLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f5f7fb] px-4 py-8">
+        <LoaderCircle className="size-6 animate-spin text-[#2f56d3]" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f5f7fb] px-4 py-8 sm:px-6 lg:px-8">
