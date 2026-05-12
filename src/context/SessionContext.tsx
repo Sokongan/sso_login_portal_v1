@@ -41,7 +41,6 @@ type SessionContextValue = {
   roles: { object: string; role: string }[];
   isPortalAdmin: boolean;
   isAuthenticated: boolean;
-  authError: string | null;
   isLoading: boolean;
   checkSession: () => Promise<void>;
   refreshSession: () => Promise<void>;
@@ -52,58 +51,28 @@ const SessionContext = createContext<SessionContextValue | undefined>(undefined)
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
-  const [authError, setAuthError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasProcessedCallback, setHasProcessedCallback] = useState(false);
   const hasHandledCallbackRef = useRef(false);
 
   const checkSession = useCallback(async () => {
-    const sessionUnavailableMessage =
-      'Unable to verify your session right now. Please try again.';
-
     try {
       const { response, data } = await apiGet<Session>(
         '/api/session?include_tuples=true&tuples_namespace=app'
       );
-      if (response.ok && data && data.authenticated !== false) {
-        setSession(data);
-        setAuthError(null);
-        return;
-      }
-
-      if (response.status === 401 || !data || data.authenticated === false) {
+      if (!response.ok) {
         setSession(null);
-        setAuthError(null);
         return;
       }
 
-      console.warn(
-        '[session] enriched session lookup failed, retrying without tuples',
-        response.status
-      );
-    } catch (error) {
-      console.warn('[session] enriched session lookup failed, retrying without tuples', error);
-    }
-
-    try {
-      const { response, data } = await apiGet<Session>('/api/session');
-      if (response.ok && data && data.authenticated !== false) {
-        setSession(data);
-        setAuthError(null);
-        return;
-      }
-
-      if (response.status === 401 || !data || data.authenticated === false) {
+      if (!data || data.authenticated === false) {
         setSession(null);
-        setAuthError(null);
         return;
       }
-
-      console.error('[session] plain session lookup failed', response.status);
-      setAuthError(sessionUnavailableMessage);
+      setSession(data);
     } catch (error) {
       console.error('[session] failed to fetch session', error);
-      setAuthError(sessionUnavailableMessage);
+      setSession(null);
     }
   }, []);
 
@@ -167,7 +136,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       console.error('[session] failed to logout', error);
     } finally {
       setSession(null);
-      setAuthError(null);
     }
   }, []);
 
@@ -232,7 +200,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       roles: session?.roles ?? [],
       isPortalAdmin,
       isAuthenticated: session?.authenticated === true,
-      authError,
       isLoading,
       checkSession,
       refreshSession,
@@ -244,7 +211,6 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       profile,
       displayName,
       isPortalAdmin,
-      authError,
       isLoading,
       checkSession,
       refreshSession,

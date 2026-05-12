@@ -17,7 +17,7 @@ export function AuthGate({
   title = "Sign in required",
   subtitle = "Use your organization account to continue.",
 }: AuthGateProps) {
-  const { isAuthenticated, isLoading, authError, handleLogin, retrySessionCheck } = useAuthGate({
+  const { isAuthenticated, isLoading, handleLogin } = useAuthGate({
     autoRedirect,
     redirectPath,
   });
@@ -36,34 +36,23 @@ export function AuthGate({
         <div className="w-full max-w-md space-y-6 rounded-2xl border border-slate-200 bg-white/90 p-6 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
           <div className="space-y-2">
             <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
-              {authError ? "Unable to verify session" : title}
+              {title}
             </h1>
             <p className="text-sm text-slate-600 dark:text-slate-400">
-              {authError ?? subtitle}
+              {subtitle}
             </p>
           </div>
 
-          {authError ? (
-            <button
-              onClick={retrySessionCheck}
-              className="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
-            >
-              Retry
-            </button>
-          ) : (
-            <>
-              <button
-                onClick={handleLogin}
-                className="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
-              >
-                Login
-              </button>
+          <button
+            onClick={handleLogin}
+            className="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-white"
+          >
+            Login
+          </button>
 
-              <p className="text-xs text-slate-500 dark:text-slate-500">
-                Redirecting to SSO if available.
-              </p>
-            </>
-          )}
+          <p className="text-xs text-slate-500 dark:text-slate-500">
+            Redirecting to SSO if available.
+          </p>
         </div>
       </div>
     );

@@ -11,9 +11,13 @@ export function useAuthGate({
   autoRedirect = false,
   redirectPath,
 }: UseAuthGate) {
-  const { isAuthenticated, isLoading, authError, checkSession } = useSession();
+  const { isAuthenticated, isLoading, checkSession } = useSession();
   const { appDSN, redirectPath: appRedirectPath, isLoading: isAppLoading } =
     useDefaultApp();
+
+  useEffect(() => {
+    void checkSession();
+  }, [checkSession]);
 
   const redirectTarget = useMemo(() => {
     if (redirectPath) return redirectPath;
@@ -28,21 +32,11 @@ export function useAuthGate({
     );
   }, [appDSN, redirectTarget]);
 
-  const retrySessionCheck = useCallback(() => {
-    void checkSession();
-  }, [checkSession]);
-
   useEffect(() => {
-    if (!isLoading && !isAppLoading && !authError && !isAuthenticated && autoRedirect) {
+    if (!isLoading && !isAppLoading && !isAuthenticated && autoRedirect) {
       handleLogin();
     }
-  }, [autoRedirect, isAuthenticated, isLoading, isAppLoading, authError, handleLogin]);
+  }, [autoRedirect, isAuthenticated, isLoading, isAppLoading, handleLogin]);
 
-  return {
-    isAuthenticated,
-    isLoading: isLoading || isAppLoading,
-    authError,
-    handleLogin,
-    retrySessionCheck,
-  };
+  return { isAuthenticated, isLoading: isLoading || isAppLoading, handleLogin };
 }
