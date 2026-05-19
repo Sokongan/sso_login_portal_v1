@@ -12,6 +12,8 @@ import {
   LockKeyhole,
   Shield,
 } from 'lucide-react';
+import { useEffect } from 'react';
+import { useSession } from '@/context/SessionContext';
 
 function getDisplayLabel(value: string | null | undefined) {
   if (!value) return 'Not configured';
@@ -90,6 +92,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const { app, appDSN, isLoading: isAppLoading, error: appError } = useDefaultApp();
   const {
+    loginChallenge,
     redirect,
     errorMessage,
     submitError,
@@ -102,6 +105,41 @@ export default function Login() {
 
   const dsn = appDSN ?? window.location.origin;
   const loginUrl = `/api/login?dsn=${encodeURIComponent(dsn)}&redirect=${encodeURIComponent(redirect)}`;
+
+  const { isAuthenticated, isLoading: isSessionLoading } = useSession();
+
+  useEffect(() => {
+    if (isSessionLoading) return;
+    if (!isAuthenticated) return;
+
+    // If user is already authenticated, complete any pending login challenge
+    // (this will redirect back to the requesting application) or navigate
+    // to the configured redirect path.
+    (async () => {
+      try {
+        if (hasChallenge && loginChallenge) {
+          const url = `/api/identity/accept-login?login_challenge=${encodeURIComponent(
+            loginChallenge
+          )}`;
+          const resp = await fetch(url, { method: 'GET', credentials: 'include' });
+          const data = await resp.json().catch(() => null);
+          if (data?.redirect_to) {
+            window.location.assign(String(data.redirect_to));
+            return;
+          }
+        }
+      } catch (err) {
+        // ignore and fallback to redirect below
+      }
+
+      // Default fallback: navigate to the configured redirect path
+      if (redirect) {
+        window.location.assign(redirect);
+      } else {
+        window.location.assign('/');
+      }
+    })();
+  }, [isAuthenticated, isSessionLoading, hasChallenge, loginChallenge, redirect]);
 
   return (
     <div className="min-h-screen bg-[#f5f7fb] px-4 py-8 sm:px-6 lg:px-8">

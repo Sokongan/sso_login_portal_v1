@@ -14,7 +14,7 @@ export function useDefaultApp(): UseDefaultAppResult {
   const [appDSN, setAppDSN] = useState<string | null>(null);
   const [redirectPath, setRedirectPath] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+
 
   useEffect(() => {
     let isMounted = true;
@@ -33,14 +33,13 @@ export function useDefaultApp(): UseDefaultAppResult {
           setApp(firstApp);
           setAppDSN(firstApp.dsn);
           setRedirectPath(firstApp.redirect_path || null);
-          setError(null);
+
         }
       } catch (err) {
         if (isMounted) {
           setApp(null);
           setAppDSN(null);
           setRedirectPath(null);
-          setError(err instanceof Error ? err.message : 'Unable to load apps.');
         }
       } finally {
         if (isMounted) {
@@ -53,6 +52,6 @@ export function useDefaultApp(): UseDefaultAppResult {
       isMounted = false;
     };
   }, []);
-
-  return { app, appDSN, redirectPath, isLoading, error };
+  console.log('useDefaultApp', { app, appDSN, redirectPath, isLoading });
+  return { app, appDSN, redirectPath, isLoading, error: null };
 }
