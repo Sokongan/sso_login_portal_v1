@@ -6,7 +6,7 @@ export default function Callback() {
           Completing sign-in
         </h1>
         <p className="text-sm text-slate-600 dark:text-slate-400">
-          Finishing the authentication flow…
+          Finishing the authentication flow...
         </p>
       </div>
     </div>

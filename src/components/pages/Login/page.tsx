@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,46 +12,7 @@ import {
   LockKeyhole,
   Shield,
 } from 'lucide-react';
-import { useEffect } from 'react';
 import { useSession } from '@/context/SessionContext';
-
-function getDisplayLabel(value: string | null | undefined) {
-  if (!value) return 'Not configured';
-
-  try {
-    const url = new URL(value, window.location.origin);
-    return url.origin === window.location.origin ? `${url.pathname}${url.search}` || '/' : url.host;
-  } catch {
-    return value;
-  }
-}
-
-function toTitleCase(value: string) {
-  return value
-    .split(/[\s-]+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-    .join(' ');
-}
-
-function getPortalLabel(value: string | null | undefined, fallback: string) {
-  if (!value) return fallback;
-
-  try {
-    const url = new URL(value, window.location.origin);
-    const host = url.host || url.pathname || fallback;
-    const base = host
-      .replace(/^www\./i, '')
-      .split('.')[0]
-      ?.replace(/[^a-zA-Z0-9]+/g, ' ')
-      .trim();
-
-    if (!base) return fallback;
-    return `${toTitleCase(base)} Portal`;
-  } catch {
-    return fallback;
-  }
-}
 
 function Notice({
   tone = 'error',
@@ -73,26 +34,17 @@ function Notice({
   );
 }
 
-function MetaItem({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="space-y-1">
-      <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-500">{label}</p>
-      <p className="text-sm text-slate-700">{value}</p>
-    </div>
-  );
-}
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
-  const { app, appDSN, isLoading: isAppLoading, error: appError } = useDefaultApp();
+  const { isLoading, isAuthenticated } = useSession();
   const {
-    loginChallenge,
+    app,
+    appDSN,
+    isLoading: isAppLoading,
+    error: appError,
+  } = useDefaultApp();
+  const {
     redirect,
     errorMessage,
     submitError,
@@ -103,43 +55,43 @@ export default function Login() {
     defaultRedirect: app?.redirect_path || '/dashboard',
   });
 
+  const targetPath = redirect || '/dashboard';
+  const appId = app?.id;
   const dsn = appDSN ?? window.location.origin;
-  const loginUrl = `/api/login?dsn=${encodeURIComponent(dsn)}&redirect=${encodeURIComponent(redirect)}`;
-
-  const { isAuthenticated, isLoading: isSessionLoading } = useSession();
-
+  const loginUrl = appId
+    ? `/api/login?app=${encodeURIComponent(appId)}&redirect=${encodeURIComponent(targetPath)}`
+    : `/api/login?dsn=${encodeURIComponent(dsn)}&redirect=${encodeURIComponent(targetPath)}`;
+  const launchUrl = appId
+    ? `/api/launch?app=${encodeURIComponent(appId)}&path=${encodeURIComponent(targetPath)}`
+    : `/api/launch?dsn=${encodeURIComponent(dsn)}&path=${encodeURIComponent(targetPath)}`;
   useEffect(() => {
-    if (isSessionLoading) return;
+    if (isLoading || isAppLoading) return;
     if (!isAuthenticated) return;
+    window.location.assign(launchUrl);
+  }, [isAuthenticated, isLoading, isAppLoading, launchUrl]);
 
-    // If user is already authenticated, complete any pending login challenge
-    // (this will redirect back to the requesting application) or navigate
-    // to the configured redirect path.
-    (async () => {
-      try {
-        if (hasChallenge && loginChallenge) {
-          const url = `/api/identity/accept-login?login_challenge=${encodeURIComponent(
-            loginChallenge
-          )}`;
-          const resp = await fetch(url, { method: 'GET', credentials: 'include' });
-          const data = await resp.json().catch(() => null);
-          if (data?.redirect_to) {
-            window.location.assign(String(data.redirect_to));
-            return;
-          }
-        }
-      } catch (err) {
-        // ignore and fallback to redirect below
-      }
+  if (isLoading || (isAuthenticated && isAppLoading)) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f5f7fb] px-6 py-12">
+        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm text-slate-600 shadow-sm">
+          <LoaderCircle className="size-4 animate-spin" />
+          Checking session...
+        </div>
+      </div>
+    );
+  }
 
-      // Default fallback: navigate to the configured redirect path
-      if (redirect) {
-        window.location.assign(redirect);
-      } else {
-        window.location.assign('/');
-      }
-    })();
-  }, [isAuthenticated, isSessionLoading, hasChallenge, loginChallenge, redirect]);
+  if (isAuthenticated) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f5f7fb] px-6 py-12">
+        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm text-slate-600 shadow-sm">
+          <LoaderCircle className="size-4 animate-spin" />
+          Redirecting to your app...
+        </div>
+      </div>
+    );
+  }
+
 
   return (
     <div className="min-h-screen bg-[#f5f7fb] px-4 py-8 sm:px-6 lg:px-8">
@@ -266,9 +218,12 @@ export default function Login() {
                     className="h-12 w-full rounded-xl bg-[#2f56d3] text-base font-medium text-white shadow-sm hover:bg-[#294cc0]"
                     disabled={isAppLoading}
                     onClick={() => {
-                      if (loginUrl) {
-                        window.location.assign(loginUrl);
+                      if (isAuthenticated) {
+                        window.location.assign(launchUrl);
+                        return;
                       }
+
+                      window.location.assign(loginUrl);
                     }}
                   >
                     {isAppLoading ? (

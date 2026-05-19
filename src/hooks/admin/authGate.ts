@@ -12,7 +12,12 @@ export function useAuthGate({
   redirectPath,
 }: UseAuthGate) {
   const { isAuthenticated, isLoading, checkSession } = useSession();
-  const { appDSN, redirectPath: appRedirectPath, isLoading: isAppLoading } =
+  const {
+    app,
+    appDSN,
+    redirectPath: appRedirectPath,
+    isLoading: isAppLoading,
+  } =
     useDefaultApp();
 
   useEffect(() => {
@@ -26,11 +31,18 @@ export function useAuthGate({
   }, [appRedirectPath, redirectPath]);
 
   const handleLogin = useCallback(() => {
+    const appId = app?.id;
     const dsn = appDSN ?? window.location.origin;
-    window.location.assign(
-      `/api/login?dsn=${encodeURIComponent(dsn)}&redirect=${encodeURIComponent(redirectTarget)}`
-    );
-  }, [appDSN, redirectTarget]);
+    const entryUrl = isAuthenticated
+      ? appId
+        ? `/api/launch?app=${encodeURIComponent(appId)}&path=${encodeURIComponent(redirectTarget)}`
+        : `/api/launch?dsn=${encodeURIComponent(dsn)}&path=${encodeURIComponent(redirectTarget)}`
+      : appId
+      ? `/api/login?app=${encodeURIComponent(appId)}&redirect=${encodeURIComponent(redirectTarget)}`
+      : `/api/login?dsn=${encodeURIComponent(dsn)}&redirect=${encodeURIComponent(redirectTarget)}`;
+
+    window.location.assign(entryUrl);
+  }, [app?.id, appDSN, isAuthenticated, redirectTarget]);
 
   useEffect(() => {
     if (!isLoading && !isAppLoading && !isAuthenticated && autoRedirect) {
