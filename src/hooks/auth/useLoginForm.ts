@@ -15,8 +15,16 @@ type UseLoginFormState = {
   handleSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
 };
 
-function restartLoginFlow() {
-  window.location.replace('/api/login');
+function redirectToInvalidEntry() {
+  const error = encodeURIComponent(
+    JSON.stringify({
+      status: 'invalid_entry',
+      message:
+        'This SSO login page must be opened from a requesting application.',
+    })
+  );
+
+  window.location.replace(`/error?id=invalid_entry&error=${error}`);
 }
 
 export function useLoginForm(): UseLoginFormState {
@@ -43,7 +51,7 @@ export function useLoginForm(): UseLoginFormState {
       return;
     }
 
-    restartLoginFlow();
+    redirectToInvalidEntry();
   }, [loginChallenge]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -51,7 +59,7 @@ export function useLoginForm(): UseLoginFormState {
     setSubmitError('');
 
     if (!loginChallenge) {
-      restartLoginFlow();
+      redirectToInvalidEntry();
       return;
     }
 
@@ -83,7 +91,7 @@ export function useLoginForm(): UseLoginFormState {
         return;
       }
 
-      window.location.assign(data.redirect_to);
+      window.location.replace(data.redirect_to);
     } catch {
       setSubmitError('Network error.');
     } finally {

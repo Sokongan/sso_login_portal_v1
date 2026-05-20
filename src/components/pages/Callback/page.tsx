@@ -8,8 +8,15 @@ type CallbackResponse = {
   token?: string;
 };
 
-function restartLoginFlow() {
-  window.location.replace('/api/login');
+function redirectToCallbackError(message: string, id = 'callback_failed') {
+  const error = encodeURIComponent(
+    JSON.stringify({
+      status: id,
+      message,
+    })
+  );
+
+  window.location.replace(`/error?id=${encodeURIComponent(id)}&error=${error}`);
 }
 
 export default function Callback() {
@@ -22,7 +29,7 @@ export default function Callback() {
       const state = params.get('state');
 
       if (!code || !state) {
-        restartLoginFlow();
+        redirectToCallbackError('Missing callback parameters.', 'invalid_callback');
         return;
       }
 
@@ -31,7 +38,7 @@ export default function Callback() {
         const { response, data } = await apiGet<CallbackResponse>(callbackUrl);
 
         if (response.redirected) {
-          window.location.assign(response.url);
+          window.location.replace(response.url);
           return;
         }
 
@@ -45,13 +52,15 @@ export default function Callback() {
           throw new Error('Missing redirect target.');
         }
 
-        window.location.assign(redirectTarget);
-      } catch {
+        window.location.replace(redirectTarget);
+      } catch (cause) {
         if (cancelled) {
           return;
         }
 
-        restartLoginFlow();
+        redirectToCallbackError(
+          cause instanceof Error ? cause.message : 'Failed to complete sign-in.'
+        );
       }
     }
 

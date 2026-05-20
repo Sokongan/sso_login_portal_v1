@@ -47,7 +47,7 @@ export default function Login() {
       <div className="flex min-h-screen items-center justify-center bg-[#f5f7fb] px-6 py-12">
         <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm text-slate-600 shadow-sm">
           <LoaderCircle className="size-4 animate-spin" />
-          Refreshing sign-in...
+          Validating sign-in request...
         </div>
       </div>
     );
