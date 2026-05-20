@@ -1,8 +1,7 @@
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { useDefaultApp } from '@/hooks/auth/useDefaultApp';
 import { useLoginForm } from '@/hooks/auth/useLoginForm';
 import {
   ArrowRight,
@@ -12,7 +11,6 @@ import {
   LockKeyhole,
   Shield,
 } from 'lucide-react';
-import { useSession } from '@/context/SessionContext';
 
 function Notice({
   tone = 'error',
@@ -34,64 +32,15 @@ function Notice({
   );
 }
 
-
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
-  const { isLoading, isAuthenticated } = useSession();
   const {
-    app,
-    appDSN,
-    isLoading: isAppLoading,
-    error: appError,
-  } = useDefaultApp();
-  const {
-    redirect,
     errorMessage,
     submitError,
     isSubmitting,
     hasChallenge,
     handleSubmit,
-  } = useLoginForm({
-    defaultRedirect: app?.redirect_path || '/dashboard',
-  });
-
-  const targetPath = redirect || '/dashboard';
-  const appId = app?.id;
-  const dsn = appDSN ?? window.location.origin;
-  const loginUrl = appId
-    ? `/api/login?app=${encodeURIComponent(appId)}&redirect=${encodeURIComponent(targetPath)}`
-    : `/api/login?dsn=${encodeURIComponent(dsn)}&redirect=${encodeURIComponent(targetPath)}`;
-  const launchUrl = appId
-    ? `/api/launch?app=${encodeURIComponent(appId)}&path=${encodeURIComponent(targetPath)}`
-    : `/api/launch?dsn=${encodeURIComponent(dsn)}&path=${encodeURIComponent(targetPath)}`;
-  useEffect(() => {
-    if (isLoading || isAppLoading) return;
-    if (!isAuthenticated) return;
-    window.location.assign(launchUrl);
-  }, [isAuthenticated, isLoading, isAppLoading, launchUrl]);
-
-  if (isLoading || (isAuthenticated && isAppLoading)) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f5f7fb] px-6 py-12">
-        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm text-slate-600 shadow-sm">
-          <LoaderCircle className="size-4 animate-spin" />
-          Checking session...
-        </div>
-      </div>
-    );
-  }
-
-  if (isAuthenticated) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f5f7fb] px-6 py-12">
-        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm text-slate-600 shadow-sm">
-          <LoaderCircle className="size-4 animate-spin" />
-          Redirecting to your app...
-        </div>
-      </div>
-    );
-  }
-
+  } = useLoginForm();
 
   return (
     <div className="min-h-screen bg-[#f5f7fb] px-4 py-8 sm:px-6 lg:px-8">
@@ -126,125 +75,87 @@ export default function Login() {
               <div className="space-y-2">
                 <h2 className="text-4xl font-semibold tracking-tight text-slate-950">Log in</h2>
                 <p className="max-w-sm text-base leading-7 text-slate-600">
-                  {hasChallenge
-                    ? 'Enter your credentials to complete access to the portal.'
-                    : 'Continue with your identity provider to access the portal.'}
+                  Enter your credentials to continue the shared sign-in flow.
                 </p>
               </div>
 
-              {appError ? <Notice tone="warning">{appError}</Notice> : null}
               {errorMessage ? <Notice>{errorMessage}</Notice> : null}
+              {!hasChallenge ? (
+                <Notice tone="warning">
+                  Missing login challenge. This page must be opened by the identity flow.
+                </Notice>
+              ) : null}
 
-              {hasChallenge ? (
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700" htmlFor="identifier">
-                      User ID
-                    </label>
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700" htmlFor="identifier">
+                    User ID
+                  </label>
+                  <Input
+                    id="identifier"
+                    name="identifier"
+                    type="text"
+                    autoComplete="username"
+                    placeholder="Enter your USER ID e.g DOJ******"
+                    required
+                    className="h-12 rounded-xl border-slate-200 bg-white px-4 shadow-sm focus-visible:ring-[#2f56d3]/20"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700" htmlFor="password">
+                    Password
+                  </label>
+                  <div className="relative">
                     <Input
-                      id="identifier"
-                      name="identifier"
-                      type="text"
-                      autoComplete="username"
-                      placeholder="Enter your USER ID e.g DOJ******"
+                      id="password"
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
+                      placeholder="Enter your password"
                       required
-                      className="h-12 rounded-xl border-slate-200 bg-white px-4 shadow-sm focus-visible:ring-[#2f56d3]/20"
+                      className="h-12 rounded-xl border-slate-200 bg-white px-4 pr-12 shadow-sm focus-visible:ring-[#2f56d3]/20"
                     />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700" htmlFor="password">
-                      Password
-                    </label>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        name="password"
-                        type={showPassword ? 'text' : 'password'}
-                        autoComplete="current-password"
-                        placeholder="Enter your password"
-                        required
-                        className="h-12 rounded-xl border-slate-200 bg-white px-4 pr-12 shadow-sm focus-visible:ring-[#2f56d3]/20"
-                      />
-                      <button
-                        type="button"
-                        className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-slate-500 transition hover:text-slate-700"
-                        onClick={() => setShowPassword((value) => !value)}
-                        aria-label={showPassword ? 'Hide password' : 'Show password'}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="size-4" />
-                        ) : (
-                          <Eye className="size-4" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
-                    CAPTCHA placeholder (integrate reCAPTCHA here)
-                  </div>
-
-                  {submitError ? <Notice>{submitError}</Notice> : null}
-
-                  <Button
-                    type="submit"
-                    size="lg"
-                    className="h-12 w-full rounded-xl bg-[#2f56d3] text-base font-medium text-white shadow-sm hover:bg-[#294cc0]"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <LoaderCircle className="size-4 animate-spin" />
-                        Signing in
-                      </>
-                    ) : (
-                      <>
-                        Sign in
-                        <ArrowRight className="size-4" />
-                      </>
-                    )}
-                  </Button>
-                </form>
-              ) : (
-                <div className="space-y-5">
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-7 text-slate-600">
-                    Authentication will continue on your configured identity provider. Once
-                    approved, you will be returned to the requesting application.
-                  </div>
-
-                  <Button
-                    size="lg"
-                    className="h-12 w-full rounded-xl bg-[#2f56d3] text-base font-medium text-white shadow-sm hover:bg-[#294cc0]"
-                    disabled={isAppLoading}
-                    onClick={() => {
-                      if (isAuthenticated) {
-                        window.location.assign(launchUrl);
-                        return;
-                      }
-
-                      window.location.assign(loginUrl);
-                    }}
-                  >
-                    {isAppLoading ? (
-                      <>
-                        <LoaderCircle className="size-4 animate-spin" />
-                        Loading configuration
-                      </>
-                    ) : (
-                      <>
-                        Continue with SSO
-                        <ArrowRight className="size-4" />
-                      </>
-                    )}
-                  </Button>
-
-                  <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
-                    Password recovery and secondary verification are handled by your identity
-                    provider.
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-slate-500 transition hover:text-slate-700"
+                      onClick={() => setShowPassword((value) => !value)}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="size-4" />
+                      ) : (
+                        <Eye className="size-4" />
+                      )}
+                    </button>
                   </div>
                 </div>
-              )}
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-600">
+                  CAPTCHA placeholder (integrate reCAPTCHA here)
+                </div>
+
+                {submitError ? <Notice>{submitError}</Notice> : null}
+
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="h-12 w-full rounded-xl bg-[#2f56d3] text-base font-medium text-white shadow-sm hover:bg-[#294cc0]"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <LoaderCircle className="size-4 animate-spin" />
+                      Signing in
+                    </>
+                  ) : (
+                    <>
+                      Sign in
+                      <ArrowRight className="size-4" />
+                    </>
+                  )}
+                </Button>
+              </form>
             </div>
 
             <div className="mx-auto flex w-full max-w-md items-center justify-between gap-4 pt-8 text-sm text-slate-500">

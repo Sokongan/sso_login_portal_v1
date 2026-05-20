@@ -1,9 +1,12 @@
 import { useMemo, useState, type FormEvent } from 'react';
-import { useSearchParams } from 'react-router-dom';
+
+type SubmitLoginResponse = {
+  error?: string;
+  redirect_to?: string;
+};
 
 type UseLoginFormState = {
   loginChallenge: string;
-  redirect: string;
   errorMessage: string;
   submitError: string;
   isSubmitting: boolean;
@@ -11,15 +14,12 @@ type UseLoginFormState = {
   handleSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
 };
 
-type UseLoginFormOptions = {
-  defaultRedirect?: string;
-};
-
-export function useLoginForm(options: UseLoginFormOptions = {}): UseLoginFormState {
-  const [searchParams] = useSearchParams();
+export function useLoginForm(): UseLoginFormState {
+  const searchParams = useMemo(
+    () => new URLSearchParams(window.location.search),
+    []
+  );
   const loginChallenge = searchParams.get('login_challenge') ?? '';
-  const redirect =
-    searchParams.get('redirect') ?? options.defaultRedirect ?? '/dashboard';
   const error = searchParams.get('error') ?? '';
   const [submitError, setSubmitError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,6 +36,12 @@ export function useLoginForm(options: UseLoginFormOptions = {}): UseLoginFormSta
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitError('');
+
+    if (!loginChallenge) {
+      setSubmitError('Missing login challenge.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     const form = event.currentTarget;
@@ -52,30 +58,27 @@ export function useLoginForm(options: UseLoginFormOptions = {}): UseLoginFormSta
         },
         credentials: 'include',
         body: JSON.stringify({
-          login_challenge: loginChallenge,
           identifier,
           password,
+          login_challenge: loginChallenge,
         }),
       });
 
-      const contentType = response.headers.get('content-type') ?? '';
-      if (contentType.includes('application/json')) {
-        const data = await response.json();
-        if (data?.error) {
-          setSubmitError(String(data.error));
-          return;
-        }
-        if (data?.redirect_to) {
-          window.location.assign(String(data.redirect_to));
-          return;
-        }
-      }
+      const data = (await response.json().catch(() => null)) as SubmitLoginResponse | null;
 
       if (!response.ok) {
-        setSubmitError('Unable to sign in. Please try again.');
+        setSubmitError(data?.error || 'Login failed.');
+        return;
       }
+
+      if (!data?.redirect_to) {
+        setSubmitError('Missing redirect target.');
+        return;
+      }
+
+      window.location.assign(data.redirect_to);
     } catch {
-      setSubmitError('Unable to sign in. Please try again.');
+      setSubmitError('Network error.');
     } finally {
       setIsSubmitting(false);
     }
@@ -83,7 +86,6 @@ export function useLoginForm(options: UseLoginFormOptions = {}): UseLoginFormSta
 
   return {
     loginChallenge,
-    redirect,
     errorMessage,
     submitError,
     isSubmitting,

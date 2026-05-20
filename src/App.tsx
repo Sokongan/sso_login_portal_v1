@@ -1,80 +1,15 @@
-import { useEffect } from "react";
-import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
-import { DashboardPage } from "./pages/Dashboard";
-import { AppLayout } from "./components/layout/AppLayout";
-import { FormsPage } from "./pages/Forms";
-import { BirthdayPage } from "./pages/Birthday";
-import { ProvidentFundPage } from "./pages/ProvidentFund";
-import { IssuedEquipmentPage } from "./pages/IssuedEquipment";
-import { RequestPage } from "./pages/Request";
-import { SalnPage } from "./pages/Saln";
-import Leave from "./pages/Leave";
-import { AuthGate } from "./components/auth/AuthGate";
-import LoginPage from "./components/pages/Login/page";
-import CallbackPage from "./components/pages/Callback/page";
-import AdminPage from "./components/pages/Authenticated/Admin/page";
-import AdminConfigAppsPage from "./components/pages/Authenticated/AdminConfigApps/page";
-import AdminConfigRolesPage from "./components/pages/Authenticated/AdminConfigRoles/page";
-import AdminUsersCreatePage from "./components/pages/Authenticated/AdminUsersCreate/page";
-import AccountSettingsPage from "./components/pages/Authenticated/Settings/page";
-
-function ScrollToTop() {
-  const { pathname } = useLocation();
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-  }, [pathname]);
-
-  return null;
-}
-
-function PlaceholderPage({ title }: { title: string }) {
-  return (
-    <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-6">
-      <h1 className="text-xl font-semibold text-slate-900">{title}</h1>
-      <p className="mt-2 text-sm text-slate-600">This module is ready for implementation.</p>
-    </div>
-  );
-}
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import ErrorPage from './components/pages/Error/page';
+import LoginPage from './components/pages/Login/page';
 
 export default function App() {
   return (
     <BrowserRouter>
-      <ScrollToTop />
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/callback" element={<CallbackPage />} />
-
-        <Route
-          path="/"
-          element={
-            <AuthGate autoRedirect>
-              <AppLayout />
-            </AuthGate>
-          }
-        >
-          <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="email" element={<PlaceholderPage title="Email" />} />
-          <Route path="directory" element={<PlaceholderPage title="Directory" />} />
-          <Route path="forms" element={<FormsPage /> } />
-          <Route path="birthday" element={<BirthdayPage /> } />
-          <Route path="payslip" element={<PlaceholderPage title="Payslip" />} />
-          <Route path="provident-fund" element={<ProvidentFundPage />} />
-          <Route path="issued-equipment" element={<IssuedEquipmentPage />} />
-          <Route path="saln" element={<SalnPage />} />
-          <Route path="request" element={<RequestPage />} />
-          <Route path="leave" element={<Leave/>} />
-          <Route path="support" element={<PlaceholderPage title="Support" />} />
-          <Route path="settings" element={<AccountSettingsPage />} />
-          <Route path="admin" element={<AdminPage />} />
-          <Route path="admin/users/new" element={<AdminUsersCreatePage />} />
-          <Route path="admin/config" element={<Navigate to="/admin/config/roles" replace />} />
-          <Route path="admin/config/roles" element={<AdminConfigRolesPage />} />
-          <Route path="admin/config/apps" element={<AdminConfigAppsPage />} />
-        </Route>
-
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/error" element={<ErrorPage />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </BrowserRouter>
   );
