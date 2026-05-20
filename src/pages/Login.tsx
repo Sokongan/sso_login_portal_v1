@@ -47,13 +47,13 @@ export function LoginPage() {
               className="mt-6 space-y-4"
               onSubmit={(e) => {
                 e.preventDefault();
-                // call your real login endpoint here
+
                 window.location.assign("/");
               }}
             >
               <div>
                 <label className="text-sm font-medium text-slate-700">User ID</label>
-                <Input autoComplete="username" className="mt-1" placeholder="e.g. KFSANTOS" />
+                <Input autoComplete="username" className="mt-1" placeholder="e.g. USERNAME" />
               </div>
 
               <div>

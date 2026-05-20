@@ -1,4 +1,5 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import CallbackPage from './components/pages/Callback/page';
 import ErrorPage from './components/pages/Error/page';
 import LoginPage from './components/pages/Login/page';
 
@@ -7,6 +8,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/callback" element={<CallbackPage />} />
         <Route path="/error" element={<ErrorPage />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
