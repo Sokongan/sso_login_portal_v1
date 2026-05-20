@@ -42,6 +42,17 @@ export default function Login() {
     handleSubmit,
   } = useLoginForm();
 
+  if (!hasChallenge) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f5f7fb] px-6 py-12">
+        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 text-sm text-slate-600 shadow-sm">
+          <LoaderCircle className="size-4 animate-spin" />
+          Refreshing sign-in...
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#f5f7fb] px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl items-center justify-center">
@@ -80,11 +91,6 @@ export default function Login() {
               </div>
 
               {errorMessage ? <Notice>{errorMessage}</Notice> : null}
-              {!hasChallenge ? (
-                <Notice tone="warning">
-                  Missing login challenge. This page must be opened by the identity flow.
-                </Notice>
-              ) : null}
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="space-y-2">

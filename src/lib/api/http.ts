@@ -4,9 +4,10 @@ type ApiResult<T> = {
 };
 
 function mergeHeaders(init?: RequestInit) {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
+  const headers: Record<string, string> = {};
+  if (init?.body !== undefined) {
+    headers['Content-Type'] = 'application/json';
+  }
   return {
     ...headers,
     ...(init?.headers ?? {}),

@@ -1,4 +1,5 @@
-import { useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { apiPost } from '@/lib/api/http';
 
 type SubmitLoginResponse = {
   error?: string;
@@ -13,6 +14,10 @@ type UseLoginFormState = {
   hasChallenge: boolean;
   handleSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
 };
+
+function restartLoginFlow() {
+  window.location.replace('/api/login');
+}
 
 export function useLoginForm(): UseLoginFormState {
   const searchParams = useMemo(
@@ -33,12 +38,20 @@ export function useLoginForm(): UseLoginFormState {
     return 'Unable to sign in. Please try again.';
   }, [error]);
 
+  useEffect(() => {
+    if (loginChallenge) {
+      return;
+    }
+
+    restartLoginFlow();
+  }, [loginChallenge]);
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitError('');
 
     if (!loginChallenge) {
-      setSubmitError('Missing login challenge.');
+      restartLoginFlow();
       return;
     }
 
@@ -51,20 +64,14 @@ export function useLoginForm(): UseLoginFormState {
       ?.value ?? '';
 
     try {
-      const response = await fetch('/api/identity/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
+      const { response, data } = await apiPost<SubmitLoginResponse>(
+        '/api/identity/login',
+        {
           identifier,
           password,
           login_challenge: loginChallenge,
-        }),
-      });
-
-      const data = (await response.json().catch(() => null)) as SubmitLoginResponse | null;
+        }
+      );
 
       if (!response.ok) {
         setSubmitError(data?.error || 'Login failed.');

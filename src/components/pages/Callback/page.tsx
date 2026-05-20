@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { apiGet } from '@/lib/api/http';
 
 type CallbackResponse = {
   error?: string;
@@ -8,9 +8,11 @@ type CallbackResponse = {
   token?: string;
 };
 
-export default function Callback() {
-  const [error, setError] = useState('');
+function restartLoginFlow() {
+  window.location.replace('/api/login');
+}
 
+export default function Callback() {
   useEffect(() => {
     let cancelled = false;
 
@@ -20,25 +22,19 @@ export default function Callback() {
       const state = params.get('state');
 
       if (!code || !state) {
-        if (!cancelled) {
-          setError('Missing callback parameters.');
-        }
+        restartLoginFlow();
         return;
       }
 
       try {
         const callbackUrl = `/api/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
-        const response = await fetch(callbackUrl, {
-          method: 'GET',
-          credentials: 'include',
-        });
+        const { response, data } = await apiGet<CallbackResponse>(callbackUrl);
 
         if (response.redirected) {
           window.location.assign(response.url);
           return;
         }
 
-        const data = (await response.json().catch(() => null)) as CallbackResponse | null;
         const redirectTarget = data?.redirect_to || data?.redirect;
 
         if (!response.ok) {
@@ -50,14 +46,12 @@ export default function Callback() {
         }
 
         window.location.assign(redirectTarget);
-      } catch (cause) {
+      } catch {
         if (cancelled) {
           return;
         }
 
-        setError(
-          cause instanceof Error ? cause.message : 'Failed to complete sign-in.'
-        );
+        restartLoginFlow();
       }
     }
 
@@ -68,27 +62,6 @@ export default function Callback() {
     };
   }, []);
 
-  if (error) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50 px-6 py-12 dark:bg-slate-950">
-        <div className="w-full max-w-md space-y-4 rounded-2xl border border-slate-200 bg-white/90 p-6 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
-          <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
-            Authentication Error
-          </h1>
-          <p className="text-sm text-slate-600 dark:text-slate-400">{error}</p>
-          <div>
-            <Link
-              to="/login"
-              className="inline-flex rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white dark:bg-slate-100 dark:text-slate-900"
-            >
-              Back to login
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-6 py-12 dark:bg-slate-950">
       <div className="w-full max-w-md space-y-4 rounded-2xl border border-slate-200 bg-white/90 p-6 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
@@ -96,7 +69,7 @@ export default function Callback() {
           Completing sign-in
         </h1>
         <p className="text-sm text-slate-600 dark:text-slate-400">
-          Finishing the authentication flow...
+          Refreshing the authentication flow...
         </p>
       </div>
     </div>
