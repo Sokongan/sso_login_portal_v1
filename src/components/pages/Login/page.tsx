@@ -67,7 +67,7 @@ export function LoginForm({
                         </FieldDescription>
                     </div>
                     <Field>
-                        <FieldLabel htmlFor="text">Registered Email or DOJ ID</FieldLabel>
+                        <FieldLabel htmlFor="identifier">Registered Email or DOJ ID</FieldLabel>
                         <Input
                             id="identifier"
                             name="identifier"
@@ -79,25 +79,27 @@ export function LoginForm({
                     </Field>
                     <Field>
                         <FieldLabel htmlFor="password">Password</FieldLabel>
-                        <Input
-                            id="password"
-                            name="password"
-                            type={showPassword ? 'text' : 'password'}
-                            autoComplete="current-password"
-                            placeholder="Enter your password"
-                            required
-
-                        />
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="absolute inset-y-0 right-1 my-auto size-9 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-                            onClick={() => setShowPassword((value) => !value)}
-                            aria-label={showPassword ? 'Hide password' : 'Show password'}
-                        >
-                            {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                        </Button>
+                        <div className="relative">
+                            <Input
+                                id="password"
+                                name="password"
+                                type={showPassword ? 'text' : 'password'}
+                                autoComplete="current-password"
+                                placeholder="Enter your password"
+                                className="pr-12"
+                                required
+                            />
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="absolute inset-y-0 right-1 my-auto size-8 rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                                onClick={() => setShowPassword((value) => !value)}
+                                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                            >
+                                {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                            </Button>
+                        </div>
                     </Field>
                     <Field className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-600">
                         <div className="flex items-center gap-2 font-medium text-slate-800">
