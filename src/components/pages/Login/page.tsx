@@ -1,15 +1,9 @@
-import { useState, type ReactNode } from 'react';
 import {
     ArrowRight,
-    Building2,
-    CheckCircle2,
     Eye,
     EyeOff,
     KeyRound,
-    LockKeyhole,
     LoaderCircle,
-    ShieldCheck,
-    Sparkles,
     GalleryVerticalEnd,
 } from 'lucide-react';
 
@@ -19,6 +13,7 @@ import { useLoginForm } from '@/hooks/auth/use-login-form';
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { cn } from '@/lib/utils';
 import { AlertMessage } from '@/components/alertmessage';
+import { useState } from 'react';
 
 
 export function LoginForm({
@@ -28,7 +23,6 @@ export function LoginForm({
     const [showPassword, setShowPassword] = useState(false);
     const {
         loginChallenge,
-        errorMessage,
         submitError,
         isSubmitting,
         handleSubmit,
@@ -110,9 +104,6 @@ export function LoginForm({
                         </div>
                     </Field>
                     <Field>
-                        {submitError ? 
-                        <AlertMessage title="Error" description={submitError} variant="destructive" /> : null}
-
                         <Button
                             type="submit"
                             size="lg"
@@ -133,7 +124,7 @@ export function LoginForm({
                         </Button>
                     </Field>
                     <Field>
-                        {errorMessage ? <AlertMessage title="Error" description={errorMessage} variant="destructive" /> : null}
+                        {submitError ? <AlertMessage title="Error" description={submitError} variant="destructive" /> : null}
                     </Field>
                 </FieldGroup>
             </form>

@@ -1,63 +1,40 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { apiPost } from '@/lib/api/http';
 import { useSearchParams } from 'react-router-dom';
+import { redirectError } from '../redirects/redirects';
+
+type UseLoginFormState = {
+  loginChallenge: string;
+  submitError: string;
+  isSubmitting: boolean;
+  handleSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
+};
+
 
 type SubmitLoginResponse = {
   error?: string;
   redirect_to?: string;
 };
 
-type UseLoginFormState = {
-  loginChallenge: string;
-  errorMessage: string;
-  submitError: string;
-  isSubmitting: boolean;
-  handleSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
-};
-
-function redirectToInvalidEntry() {
-  const error = encodeURIComponent(
-    JSON.stringify({
-      status: 'invalid_entry',
-      message:
-        'This SSO login page must be opened from a requesting application.',
-    })
-  );
-
-  window.location.replace(`/error?id=invalid_entry&error=${error}`);
-}
 
 export function useLoginForm(): UseLoginFormState {
   const searchParams = useSearchParams(new URLSearchParams(window.location.search))[0];
   const loginChallenge = searchParams.get('login_challenge') ?? '';
-  const error = searchParams.get('error') ?? '';
-  const [submitError, setSubmitError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const errorMessage = useMemo(() => {
-    if (!error) return '';
-    if (error === 'invalid_credentials') {
-      return 'The provided credentials are invalid. Check your username/email and password.';
-    }
-    return 'Unable to sign in. Please try again.';
-  }, [error]);
+  const [submitError, setSubmitError] = useState('');
 
   useEffect(() => {
-    if (loginChallenge) {
-      return;
+    if (!loginChallenge) {
+      redirectError({
+        id: 'invalid_entry',
+        status: 'invalid_entry',
+        message: 'This SSO login page must be opened from a requesting application.',
+      });
     }
-
-    redirectToInvalidEntry();
   }, [loginChallenge]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setSubmitError('');
-
-    if (!loginChallenge) {
-      redirectToInvalidEntry();
-      return;
-    }
 
     setIsSubmitting(true);
 
@@ -68,7 +45,7 @@ export function useLoginForm(): UseLoginFormState {
       ?.value ?? '';
 
     try {
-      const { response, data } = await apiPost<SubmitLoginResponse>(
+      const { data, response } = await apiPost<SubmitLoginResponse>(
         '/api/identity/login',
         {
           identifier,
@@ -76,10 +53,9 @@ export function useLoginForm(): UseLoginFormState {
           login_challenge: loginChallenge,
         }
       );
-
+      
       if (!response.ok) {
-        setSubmitError(data?.error || 'Login failed.');
-        return;
+        setSubmitError('Login failed. Please check your credentials and try again.');
       }
 
       if (!data?.redirect_to) {
@@ -89,7 +65,7 @@ export function useLoginForm(): UseLoginFormState {
 
       window.location.replace(data.redirect_to);
     } catch {
-      setSubmitError('Network error.');
+      setSubmitError('Identity provider is unreachable. Please try again later.');
     } finally {
       setIsSubmitting(false);
     }
@@ -97,7 +73,6 @@ export function useLoginForm(): UseLoginFormState {
 
   return {
     loginChallenge,
-    errorMessage,
     submitError,
     isSubmitting,
     handleSubmit,

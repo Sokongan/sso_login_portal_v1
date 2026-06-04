@@ -1,42 +1,11 @@
-import { useCallback, useEffect } from 'react';
+import { redirectCallback } from '@/hooks/auth/callback';
+import {  useEffect } from 'react';
 
-function getCallbackParams(): { code: string | null; state: string | null } {
-  if (typeof window === 'undefined') return { code: null, state: null };
-  const params = new URLSearchParams(window.location.search);
-  return {
-    code: params.get('code'),
-    state: params.get('state'),
-  };
-}
-
-function redirectToCallbackError(message: string, id = 'callback_failed') {
-  const error = encodeURIComponent(
-    JSON.stringify({
-      status: id,
-      message,
-    })
-  );
-  window.location.replace(`/error?id=${encodeURIComponent(id)}&error=${error}`);
-}
 
 export default function Callback() {
-  // Memoize callback completion logic
-  const completeCallback = useCallback(async () => {
-    const { code, state } = getCallbackParams();
-
-    if (!code || !state) {
-      redirectToCallbackError('Missing callback parameters.', 'invalid_callback');
-      return;
-    }
-
-    const callbackUrl = `/api/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
-    window.location.href = callbackUrl;
-  }, []);
-
-  // Run callback completion on mount
   useEffect(() => {
-    void completeCallback();
-  }, [completeCallback]);
+    void redirectCallback();
+  }, []);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-6 py-12 dark:bg-slate-950">
