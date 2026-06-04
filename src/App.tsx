@@ -1,7 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import CallbackPage from './components/pages/Callback/page';
 import ErrorPage from './components/pages/Error/page';
-import LoginPage from './components/pages/Login/page';
+import LoginPage from './pages/Login';
 
 export default function App() {
   return (

@@ -1,12 +1,13 @@
-import { useEffect } from 'react';
-import { apiGet } from '@/lib/api/http';
+import { useCallback, useEffect } from 'react';
 
-type CallbackResponse = {
-  error?: string;
-  redirect?: string;
-  redirect_to?: string;
-  token?: string;
-};
+function getCallbackParams(): { code: string | null; state: string | null } {
+  if (typeof window === 'undefined') return { code: null, state: null };
+  const params = new URLSearchParams(window.location.search);
+  return {
+    code: params.get('code'),
+    state: params.get('state'),
+  };
+}
 
 function redirectToCallbackError(message: string, id = 'callback_failed') {
   const error = encodeURIComponent(
@@ -15,61 +16,27 @@ function redirectToCallbackError(message: string, id = 'callback_failed') {
       message,
     })
   );
-
   window.location.replace(`/error?id=${encodeURIComponent(id)}&error=${error}`);
 }
 
 export default function Callback() {
-  useEffect(() => {
-    let cancelled = false;
+  // Memoize callback completion logic
+  const completeCallback = useCallback(async () => {
+    const { code, state } = getCallbackParams();
 
-    async function completeCallback() {
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get('code');
-      const state = params.get('state');
-
-      if (!code || !state) {
-        redirectToCallbackError('Missing callback parameters.', 'invalid_callback');
-        return;
-      }
-
-      try {
-        const callbackUrl = `/api/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
-        const { response, data } = await apiGet<CallbackResponse>(callbackUrl);
-
-        if (response.redirected) {
-          window.location.replace(response.url);
-          return;
-        }
-
-        const redirectTarget = data?.redirect_to || data?.redirect;
-
-        if (!response.ok) {
-          throw new Error(data?.error || 'Failed to complete sign-in.');
-        }
-
-        if (!redirectTarget) {
-          throw new Error('Missing redirect target.');
-        }
-
-        window.location.replace(redirectTarget);
-      } catch (cause) {
-        if (cancelled) {
-          return;
-        }
-
-        redirectToCallbackError(
-          cause instanceof Error ? cause.message : 'Failed to complete sign-in.'
-        );
-      }
+    if (!code || !state) {
+      redirectToCallbackError('Missing callback parameters.', 'invalid_callback');
+      return;
     }
 
-    void completeCallback();
-
-    return () => {
-      cancelled = true;
-    };
+    const callbackUrl = `/api/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`;
+    window.location.href = callbackUrl;
   }, []);
+
+  // Run callback completion on mount
+  useEffect(() => {
+    void completeCallback();
+  }, [completeCallback]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-6 py-12 dark:bg-slate-950">

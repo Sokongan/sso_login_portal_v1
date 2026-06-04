@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { apiPost } from '@/lib/api/http';
+import { useSearchParams } from 'react-router-dom';
 
 type SubmitLoginResponse = {
   error?: string;
@@ -11,7 +12,6 @@ type UseLoginFormState = {
   errorMessage: string;
   submitError: string;
   isSubmitting: boolean;
-  hasChallenge: boolean;
   handleSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
 };
 
@@ -28,16 +28,12 @@ function redirectToInvalidEntry() {
 }
 
 export function useLoginForm(): UseLoginFormState {
-  const searchParams = useMemo(
-    () => new URLSearchParams(window.location.search),
-    []
-  );
+  const searchParams = useSearchParams(new URLSearchParams(window.location.search))[0];
   const loginChallenge = searchParams.get('login_challenge') ?? '';
   const error = searchParams.get('error') ?? '';
   const [submitError, setSubmitError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const hasChallenge = useMemo(() => loginChallenge.length > 0, [loginChallenge]);
   const errorMessage = useMemo(() => {
     if (!error) return '';
     if (error === 'invalid_credentials') {
@@ -104,7 +100,6 @@ export function useLoginForm(): UseLoginFormState {
     errorMessage,
     submitError,
     isSubmitting,
-    hasChallenge,
     handleSubmit,
   };
 }

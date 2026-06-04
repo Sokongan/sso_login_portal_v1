@@ -78,7 +78,7 @@ export default function ErrorPage() {
                 Raw Details
               </p>
               <pre className="mt-2 max-h-64 overflow-auto rounded-lg bg-slate-950 p-4 text-xs text-slate-100 dark:bg-black/60">
-{formatJson(errorPayload ?? { errorId })}
+                {formatJson(errorPayload ?? { errorId })}
               </pre>
             </div>
           </div>
